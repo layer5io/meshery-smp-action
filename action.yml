@@ -1,0 +1,22 @@
+name: "Service Mesh Performance Testing with Meshery"
+description: "Validate SMP specification using Meshery"
+author: "Layer5"
+inputs:
+  provider_token:
+    description: "Provider token to use. NOTE: value of the 'token' key in auth.json"
+  spec:
+    description: "Spec to run. Possible values: SMI, istio-vet. (SMP coming soon)"
+    required: true
+  service_mesh:
+    # used for provisioning appropriate meshery-adatper
+    description: "Service mesh to use. e.g: osm, istio etc"
+    required: true
+  platform:
+    description: "Platform to deploy meshery on. Possible values: docker, kubernetes"
+    default: docker
+runs:
+  using: "node12"
+  main: "main.js"
+branding:
+  icon: 'check-circle'
+  color: 'green'
