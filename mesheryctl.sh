@@ -24,7 +24,7 @@ main() {
 	#docker network connect minikube meshery_meshery-"$service_mesh"_1
 	#docker network connect bridge meshery_meshery-"$service_mesh"_1
 
-	~/mesheryctl system config minikube -t ~/auth.json
+	mesheryctl system config minikube -t ~/auth.json
 	#echo $spec $service_mesh_adapter
 
 	mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_profile_name -t ~/auth.json
