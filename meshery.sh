@@ -22,7 +22,7 @@ main() {
 
 	if [[ -z $provider_token ]]
 	then
-		printf "Token not provided.\n Using local provider..."
+		printf "Token not provided.\nUsing local provider...\n"
 		echo '{ "meshery-provider": "None", "token": null }' | jq -c '.token = ""'> ~/auth.json
 	else
 		echo '{ "meshery-provider": "Meshery", "token": null }' | jq -c '.token = "'$provider_token'"' > ~/auth.json
@@ -48,9 +48,6 @@ create_k8s_cluster() {
 }
 
 meshery_config() {
-	sudo wget https://github.com/mikefarah/yq/releases/download/v4.10.0/yq_linux_amd64 -O /usr/bin/yq --quiet
-	sudo chmod +x /usr/bin/yq
-
 	mkdir ~/.meshery
 	config='{"contexts":{"local":{"endpoint":"http://localhost:9081","token":"Default","platform":"docker","adapters":[],"channel":"stable","version":"latest"}},"current-context":"local","tokens":[{"location":"auth.json","name":"Default"}]}'
 
@@ -81,15 +78,15 @@ parse_command_line() {
 					exit 1
 				fi
 				;;
-			--service-mesh)
-				if [[ -n "${2:-}" ]]; then
-					meshery_config "meshery-$2"
-					shift
-				else
-					echo "ERROR: '--service-mesh' cannot be empty." >&2
-					exit 1
-				fi
-				;;
+			#--service-mesh)
+			#	if [[ -n "${2:-}" ]]; then
+			#		meshery_config "meshery-$2"
+			#		shift
+			#	else
+			#		echo "ERROR: '--service-mesh' cannot be empty." >&2
+			#		exit 1
+			#	fi
+			#	;;
 			*)
 				break
 				;;
