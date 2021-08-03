@@ -17,6 +17,7 @@ main() {
 	#local service_mesh_adapter=
 	#local service_mesh=
 	local perf_profile_name=
+	local perf_profile_id=
 
 	parse_command_line "$@"
 	#docker network connect bridge meshery_meshery_1
@@ -27,30 +28,35 @@ main() {
 	mesheryctl system config minikube -t ~/auth.json
 	#echo $spec $service_mesh_adapter
 
-	mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_profile_name -t ~/auth.json
+	if [ -z "$perf_profile_id" ]
+	then
+		#TODO: deploy service mesh once we have SSE client in mesh deploy
+		#mesheryctl perf view $perf_profile_id -t ~/auth.json -o json
+		mesheryctl perf apply $perf_profile_id -t ~/Downloads/auth.json
+	else
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_profile_name -t ~/auth.json
+	fi
 }
 
 parse_command_line() {
 	while :
 	do
 		case "${1:-}" in
-			#--service-mesh)
-			#	if [[ -n "${2:-}" ]]; then
-			#		# figure out assigning port numbers and adapter names
-			#		service_mesh=$2
-			#		service_mesh_adapter=${adapters["$2"]}
-			#		shift
-			#	else
-			#		echo "ERROR: '--service-mesh' cannot be empty." >&2
-			#		exit 1
-			#	fi
-			#	;;
 			--profile-name)
 				if [[ -n "${2:-}" ]]; then
 					perf_profile_name=$2
 					shift
 				else
 					echo "ERROR: '--profile-name' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--profile-id)
+				if [[ -n "${2:-}" ]]; then
+					perf_profile_id=$2
+					shift
+				else
+					echo "ERROR: '--profile-id' cannot be empty." >&2
 					exit 1
 				fi
 				;;

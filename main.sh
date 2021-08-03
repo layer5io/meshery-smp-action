@@ -25,12 +25,12 @@ main() {
 	"$SCRIPT_DIR/meshery.sh" "${setupArgs[@]}"
 
 	commandArgs=()
-	#if [[ -n "${INPUT_SERVICE_MESH:-}" ]]; then
-	#	commandArgs+=(--service-mesh ${INPUT_SERVICE_MESH})
-	#fi
-
 	if [[ -n "${INPUT_PROFILE_FILENAME:-}" ]]; then
-		commandArgs+=(--profile-name ${INPUT_PROFILE_FILENAME})
+		commandArgs=(--profile-name ${INPUT_PROFILE_FILENAME})
+	fi
+
+	if [[ -n "${INPUT_PROFILE_ID:-}" ]]; then
+		commandArgs=(--profile-id ${INPUT_PROFILE_ID})
 	fi
 
 	"$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"

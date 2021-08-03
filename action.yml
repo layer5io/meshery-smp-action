@@ -10,7 +10,8 @@ inputs:
     default: docker
   profile_filename:
     description: "Name of the file containing SMP profile"
-    required: true
+  profile_name:
+    description: "Name of the performance profile"
 
 runs:
   using: "node12"
