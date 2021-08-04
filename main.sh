@@ -18,10 +18,6 @@ main() {
 		setupArgs+=(--platform ${INPUT_PLATFORM})
 	fi
 
-	#if [[ -n "${INPUT_SERVICE_MESH:-}" ]]; then
-	#	setupArgs+=(--service-mesh ${INPUT_SERVICE_MESH})
-	#fi
-
 	"$SCRIPT_DIR/meshery.sh" "${setupArgs[@]}"
 
 	commandArgs=()
@@ -37,7 +33,7 @@ main() {
 }
 
 get_dependencies() {
-		sudo wget https://github.com/mikefarah/yq/releases/download/v4.10.0/yq_linux_amd64 -O /usr/bin/yq --quiet
+	sudo wget https://github.com/mikefarah/yq/releases/download/v4.10.0/yq_linux_amd64 -O /usr/bin/yq --quiet
 	sudo chmod +x /usr/bin/yq
 }
 
