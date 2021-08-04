@@ -14,8 +14,8 @@ adapters["open_service_mesh"]=meshery-osm:10009
 adapters["traefik_mesh"]=meshery-traefik-mesh:10006
 
 main() {
+	local perf_filename=
 	local perf_profile_name=
-	local perf_profile_id=
 
 	parse_command_line "$@"
 
@@ -24,7 +24,7 @@ main() {
 	chmod +x ~/mesheryctl
 
 	# perform the test given in the provided profile_id
-	if [ -z "$perf_profile_id" ]
+	if [ -z "$perf_profile_name" ]
 	then
 
 		# get the mesh name from performance test config
@@ -47,11 +47,11 @@ main() {
 
 		fi
 
-		mesheryctl perf apply $perf_profile_id -t ~/Downloads/auth.json
+		mesheryctl perf apply --profile $perf_profile_name -t ~/Downloads/auth.json
 
 	else
 
-		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_profile_name -t ~/auth.json
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json
 
 	fi
 }
@@ -60,18 +60,18 @@ parse_command_line() {
 	while :
 	do
 		case "${1:-}" in
-			--profile-name)
+			--perf-filename)
 				if [[ -n "${2:-}" ]]; then
-					perf_profile_name=$2
+					perf_filename=$2
 					shift
 				else
 					echo "ERROR: '--profile-name' cannot be empty." >&2
 					exit 1
 				fi
 				;;
-			--profile-id)
+			--profile-name)
 				if [[ -n "${2:-}" ]]; then
-					perf_profile_id=$2
+					perf_profile_name=$2
 					shift
 				else
 					echo "ERROR: '--profile-id' cannot be empty." >&2

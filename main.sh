@@ -22,11 +22,11 @@ main() {
 
 	commandArgs=()
 	if [[ -n "${INPUT_PROFILE_FILENAME:-}" ]]; then
-		commandArgs=(--profile-name ${INPUT_PROFILE_FILENAME})
+		commandArgs=(--perf-filename ${INPUT_PROFILE_FILENAME})
 	fi
 
-	if [[ -n "${INPUT_PROFILE_ID:-}" ]]; then
-		commandArgs=(--profile-id ${INPUT_PROFILE_ID})
+	if [[ -n "${INPUT_PROFILE_NAME:-}" ]]; then
+		commandArgs=(--profile-name ${INPUT_PROFILE_NAME})
 	fi
 
 	"$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
