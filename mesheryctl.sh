@@ -27,6 +27,10 @@ main() {
 	if [ -z "$perf_profile_name" ]
 	then
 
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json
+
+	else
+
 		# get the mesh name from performance test config
 		service_mesh=$(~/mesheryctl perf view test_sm -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
 
@@ -46,12 +50,7 @@ main() {
 			~/mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
 
 		fi
-
-		mesheryctl perf apply --profile $perf_profile_name -t ~/Downloads/auth.json
-
-	else
-
-		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json
+		mesheryctl perf apply $perf_profile_name -t ~/auth.json
 
 	fi
 }
