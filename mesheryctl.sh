@@ -19,10 +19,6 @@ main() {
 
 	parse_command_line "$@"
 
-	# until meshery's stable release
-	curl -L https://github.com/DelusionalOptimist/meshery/releases/download/v0.5.44/mesheryctl --output ~/mesheryctl
-	chmod +x ~/mesheryctl
-
 	# perform the test given in the provided profile_id
 	if [ -z "$perf_profile_name" ]
 	then
@@ -32,7 +28,7 @@ main() {
 	else
 
 		# get the mesh name from performance test config
-		service_mesh=$(~/mesheryctl perf view test_sm -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
+		service_mesh=$(mesheryctl perf view test_sm -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
 
 		# deploy the mentioned service mesh if needed
 		if [[ $service_mesh != "null" ]]
@@ -47,7 +43,7 @@ main() {
 
 			mesheryctl system config minikube -t ~/auth.json
 
-			~/mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
+			mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
 
 		fi
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json
