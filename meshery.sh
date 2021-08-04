@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+set -o errexit
+set -o nounset
+set -o pipefail
+
 SCRIPT_DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}" || realpath "${BASH_SOURCE[0]}")")
 
 main() {
@@ -10,8 +14,7 @@ main() {
 	parse_command_line "$@"
 
 	echo "Checking if a k8s cluster exits..."
-	kubectl config current-context
-	if [[ $? -eq 0 ]]
+	if kubectl config current-context
 	then
 		echo "Cluster found"
 	else

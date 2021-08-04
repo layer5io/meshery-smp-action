@@ -7,50 +7,69 @@ adapters["istio"]=meshery-istio:10000
 adapters["linkerd"]=meshery-linkerd:10001
 adapters["consul"]=meshery-consul:10002
 adapters["octarine"]=meshery-octarine:10003
-adapters["nsm"]=meshery-nsm:10004
+adapters["network_service_mesh"]=meshery-nsm:10004
 adapters["kuma"]=meshery-kuma:10007
 adapters["cpx"]=meshery-cpx:10008
-adapters["osm"]=meshery-osm:10009
-adapters["traefik-mesh"]=meshery-traefik-mesh:10006
+adapters["open_service_mesh"]=meshery-osm:10009
+adapters["traefik_mesh"]=meshery-traefik-mesh:10006
 
 main() {
-	#local service_mesh_adapter=
-	#local service_mesh=
+	local perf_filename=
 	local perf_profile_name=
 
 	parse_command_line "$@"
-	#docker network connect bridge meshery_meshery_1
-	#docker network connect minikube meshery_meshery_1
-	#docker network connect minikube meshery_meshery-"$service_mesh"_1
-	#docker network connect bridge meshery_meshery-"$service_mesh"_1
 
-	mesheryctl system config minikube -t ~/auth.json
-	#echo $spec $service_mesh_adapter
+	# perform the test given in the provided profile_id
+	if [ -z "$perf_profile_name" ]
+	then
 
-	mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_profile_name -t ~/auth.json
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json
+
+	else
+
+		# get the mesh name from performance test config
+		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
+
+		# deploy the mentioned service mesh if needed
+		if [[ $service_mesh != "null" ]]
+		then
+
+			shortName=$(echo ${adapters["$service_mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
+
+			docker network connect bridge meshery_meshery_1
+			docker network connect minikube meshery_meshery_1
+			docker network connect bridge meshery_meshery-"$shortName"_1
+			docker network connect minikube meshery_meshery-"$shortName"_1
+
+			mesheryctl system config minikube -t ~/auth.json
+
+			mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
+
+		fi
+		mesheryctl perf apply $perf_profile_name -t ~/auth.json
+
+	fi
 }
 
 parse_command_line() {
 	while :
 	do
 		case "${1:-}" in
-			#--service-mesh)
-			#	if [[ -n "${2:-}" ]]; then
-			#		# figure out assigning port numbers and adapter names
-			#		service_mesh=$2
-			#		service_mesh_adapter=${adapters["$2"]}
-			#		shift
-			#	else
-			#		echo "ERROR: '--service-mesh' cannot be empty." >&2
-			#		exit 1
-			#	fi
-			#	;;
+			--perf-filename)
+				if [[ -n "${2:-}" ]]; then
+					perf_filename=$2
+					shift
+				else
+					echo "ERROR: '--profile-name' cannot be empty." >&2
+					exit 1
+				fi
+				;;
 			--profile-name)
 				if [[ -n "${2:-}" ]]; then
 					perf_profile_name=$2
 					shift
 				else
-					echo "ERROR: '--profile-name' cannot be empty." >&2
+					echo "ERROR: '--profile-id' cannot be empty." >&2
 					exit 1
 				fi
 				;;
