@@ -3,13 +3,23 @@ description: "Validate SMP specification using Meshery"
 author: "Layer5"
 
 inputs:
+  # token to connect with the remote provider
   provider_token:
     description: "Provider token to use. NOTE: value of the 'token' key in auth.json"
+    required: true
+
+  # platform to deploy meshery
   platform:
     description: "Platform to deploy meshery on. Possible values: docker, kubernetes"
     default: docker
+
+  # SUPPLY EITHER "profile_filename" or profile_name
+
+  # name of the file storing the performance profile (keep in .github)
   profile_filename:
     description: "Name of the file containing SMP profile"
+
+  # name of the prformance profile to use
   profile_name:
     description: "Name of the performance profile"
 
