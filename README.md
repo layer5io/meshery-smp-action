@@ -1,5 +1,61 @@
-# layer5-repo-template
-This repository is used as the boilerplate for consistency across all Layer5 repos.
+# Meshery SMP Action
+This repository is used for storing a GitHub action for performing SMP tests using Meshery
+
+## Inputs
+```yaml
+  # token to connect with the remote provider
+  provider_token:
+    description: "Provider token to use. NOTE: value of the 'token' key in auth.json"
+    required: true
+
+  # platform to deploy meshery
+  platform:
+    description: "Platform to deploy meshery on. Possible values: docker, kubernetes"
+    default: docker
+
+  # SUPPLY EITHER "profile_filename" or profile_name
+
+  # name of the file storing the performance profile (keep in .github)
+  profile_filename:
+    description: "Name of the file containing SMP profile"
+
+  # name of the prformance profile to use
+  profile_name:
+    description: "Name of the performance profile"
+```
+
+## Sample configuration
+```yaml
+name: Testing SMP action
+on:
+  push:
+    branches:
+      'perf'
+
+jobs:
+  job1:
+    name: Run Performance Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          ref: 'perf'
+
+      - name: Deploy k8s
+        uses: manusa/actions-setup-minikube@v2.4.1
+        with:
+          minikube version: 'v1.21.0'
+          kubernetes version: 'v1.20.7'
+          driver: docker
+
+      - name: Performance test
+        uses: layer5io/meshery-smp-action@master
+        with:
+          provider_token: ${{ secrets.PROVIDER_TOKEN }}
+          platform: docker
+          profile_name: demo
+```
 
 <div>&nbsp;</div>
 
