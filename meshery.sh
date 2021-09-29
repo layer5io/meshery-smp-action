@@ -35,7 +35,12 @@ main() {
 	kubectl config view --minify --flatten > ~/minified_config
 	mv ~/minified_config ~/.kube/config
 
-  curl -L https://git.io/meshery | PLATFORM=$PLATFORM bash -
+	curl -L https://git.io/meshery | DEPLOY_MESHERY=false bash -
+
+	mesheryctl system context create new-context --platform $PLATFORM --url http://localhost:9081 --set --yes
+	mesheryctl system channel set edge-latest
+
+	mesheryctl system start --yes
 
 	sleep 60
 }
@@ -46,17 +51,21 @@ create_k8s_cluster() {
 	sudo apt update -y
 	sudo apt install conntrack
 	minikube version
-	minikube start --driver=none --kubernetes-version=v1.20.7
+	wait_for_docker
+	minikube start --driver=docker --kubernetes-version=v1.20.7
 	sleep 40
 }
 
-meshery_config() {
-	mkdir ~/.meshery
-	config='{"contexts":{"local":{"endpoint":"http://localhost:9081","token":"Default","platform":"docker","adapters":[],"channel":"stable","version":"latest"}},"current-context":"local","tokens":[{"location":"auth.json","name":"Default"}]}'
-
-	echo $config | yq e '."contexts"."local"."adapters"[0]="'$1'"' -P - > ~/.meshery/config.yaml
-
-	cat ~/.meshery/config.yaml
+wait_for_docker() {
+	while :
+	do
+		if docker version -f '{{.Server.Version}} - {{.Client.Version}}'
+		then
+			break
+		else
+			sleep 5
+		fi
+	done
 }
 
 parse_command_line() {
@@ -81,15 +90,6 @@ parse_command_line() {
 					exit 1
 				fi
 				;;
-			#--service-mesh)
-			#	if [[ -n "${2:-}" ]]; then
-			#		meshery_config "meshery-$2"
-			#		shift
-			#	else
-			#		echo "ERROR: '--service-mesh' cannot be empty." >&2
-			#		exit 1
-			#	fi
-			#	;;
 			*)
 				break
 				;;

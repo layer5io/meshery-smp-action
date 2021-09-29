@@ -7,7 +7,6 @@ set -o pipefail
 SCRIPT_DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}" || realpath "${BASH_SOURCE[0]}")")
 
 main() {
-	get_dependencies
 
 	setupArgs=()
 	if [[ -n "${INPUT_PROVIDER_TOKEN:-}" ]]; then
@@ -29,12 +28,11 @@ main() {
 		commandArgs=(--profile-name ${INPUT_PROFILE_NAME})
 	fi
 
-	"$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
-}
+	if [[ -n "${INPUT_PLATFORM:-}" ]]; then
+		commandArgs+=(--platform ${INPUT_PLATFORM})
+	fi
 
-get_dependencies() {
-	sudo wget https://github.com/mikefarah/yq/releases/download/v4.10.0/yq_linux_amd64 -O /usr/bin/yq --quiet
-	sudo chmod +x /usr/bin/yq
+	"$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
 }
 
 main
