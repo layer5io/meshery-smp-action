@@ -1,40 +1,61 @@
-# Meshery SMP Action
-This repository is used for storing a GitHub action for performing SMP tests using Meshery
+# Meshery - SMP GitHub Action
 
-## Inputs
+GitHub Action to run SMP Performance Benchmarks on CI/CD pipelines.
+
+[Meshery](https://meshery.io/) is the canonical implementation of the [Service Mesh Performance specification](https://smp-spec.io/).
+
+## Learn More
+
+- [Performance Management in Meshery](https://docs.meshery.io/functionality/performance-management)
+- [Guide: Running Performance Tests in Meshery](https://docs.meshery.io/guides/performance-management)
+- [Supported Service Meshes](https://docs.meshery.io/service-meshes)
+
+## Usage
+
+See [action.yml](action.yml)
+
+You can use this action by defining your test configuration in a performance profile in Meshery or write your test configurations in SMP compatible format ([see example](#smp-compatible-test-configuration-file)).
+
+You can then pass in either of these to the action to run a performance test.
+
+The results of the tests are updated on the Performance Management dashboard in Meshery.
+
+See [Performance Management with Meshery](https://docs.meshery.io/guides/performance-management) for detailed instructions on setting up Meshery and authenticating the GitHub Action.
+
+## SMP Compatible Test Configuration File
+
 ```yaml
-  # token to connect with the remote provider
-  provider_token:
-    description: "Provider token to use. NOTE: value of the 'token' key in auth.json"
-    required: true
-
-  # platform to deploy meshery
-  platform:
-    description: "Platform to deploy meshery on. Possible values: docker, kubernetes"
-    default: docker
-
-  # SUPPLY EITHER "profile_filename" or profile_name
-
-  # name of the file storing the performance profile (keep in .github)
-  profile_filename:
-    description: "Name of the file containing SMP profile"
-
-  # name of the prformance profile to use
-  profile_name:
-    description: "Name of the performance profile"
+smp_version: v0.0.1
+id:
+name: Istio Performance Test
+labels: {}
+clients:
+- internal: false
+  load_generator: fortio
+  protocol: 1
+  connections: 2
+  rps: 10
+  headers: {}
+  cookies: {}
+  body: ""
+  content_type: ""
+  endpoint_urls:
+  - http://localhost:2323/productpage
+duration: "30m"
 ```
 
 ## Sample configuration
+
 ```yaml
-name: Testing SMP action
+name: Meshery SMP Action
 on:
   push:
     branches:
-      'perf'
+      'master'
 
 jobs:
-  job1:
-    name: Run Performance Test
+  performance-test:
+    name: Performance Test
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -42,22 +63,20 @@ jobs:
         with:
           ref: 'perf'
 
-      - name: Deploy k8s
+      - name: Deploy k8s-minikube
         uses: manusa/actions-setup-minikube@v2.4.1
         with:
           minikube version: 'v1.21.0'
           kubernetes version: 'v1.20.7'
           driver: docker
 
-      - name: Performance test
+      - name: Run Performance Test
         uses: layer5io/meshery-smp-action@master
         with:
           provider_token: ${{ secrets.PROVIDER_TOKEN }}
           platform: docker
-          profile_name: demo
+          profile_name: istio-soak-test
 ```
-
-<div>&nbsp;</div>
 
 ## Join the service mesh community!
 
