@@ -35,6 +35,7 @@ main() {
 	if [ -z "$perf_profile_name" ]
 	then
 
+		echo "running performance test specified in $perf_filename..."
 		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json
 
 	else
@@ -58,10 +59,12 @@ main() {
 				docker network connect minikube meshery_meshery-"$shortName"_1
 				mesheryctl system config minikube -t ~/auth.json
 
+				echo "deploying service mesh..."
 				mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
 			else
 				# --watch flag doesn't work for in cluster deployments
 				# sol: proper messaging system for events in meshery
+				echo "deploying service mesh..."
 				mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh"
 				echo "checking on $service_mesh deployments..."
 				sleep 40
@@ -69,6 +72,9 @@ main() {
 			kubectl get pods --all-namespaces
 		fi
 
+		# apply simple profile which doesn't need a service mesh
+		echo "Using $perf_profile_name..."
+		mesheryctl perf view $perf_profile_name -t ~/auth.json -o yaml
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json
 	fi
 }
