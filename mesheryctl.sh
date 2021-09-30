@@ -73,11 +73,10 @@ main() {
 			fi
 			kubectl get pods --all-namespaces
 		else
-			# apply simple profile which doesn't need a service mesh
-			echo "Using $perf_profile_name..."
-			mesheryctl perf view $perf_profile_name -t ~/auth.json -o yaml
-			mesheryctl perf apply $perf_profile_name -t ~/auth.json
 		fi
+
+		# apply performance test
+		mesheryctl perf apply $perf_profile_name -t ~/auth.json
 	fi
 }
 
