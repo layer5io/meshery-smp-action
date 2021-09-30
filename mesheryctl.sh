@@ -58,9 +58,11 @@ main() {
 				docker network connect bridge meshery_meshery-"$shortName"_1
 				docker network connect minikube meshery_meshery-"$shortName"_1
 				mesheryctl system config minikube -t ~/auth.json
+				docker ps
 
 				echo "deploying service mesh..."
 				mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
+				sleep 40
 			else
 				# --watch flag doesn't work for in cluster deployments
 				# sol: proper messaging system for events in meshery
@@ -70,12 +72,12 @@ main() {
 				sleep 40
 			fi
 			kubectl get pods --all-namespaces
+		else
+			# apply simple profile which doesn't need a service mesh
+			echo "Using $perf_profile_name..."
+			mesheryctl perf view $perf_profile_name -t ~/auth.json -o yaml
+			mesheryctl perf apply $perf_profile_name -t ~/auth.json
 		fi
-
-		# apply simple profile which doesn't need a service mesh
-		echo "Using $perf_profile_name..."
-		mesheryctl perf view $perf_profile_name -t ~/auth.json -o yaml
-		mesheryctl perf apply $perf_profile_name -t ~/auth.json
 	fi
 }
 
