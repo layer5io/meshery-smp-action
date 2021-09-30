@@ -72,7 +72,6 @@ main() {
 				sleep 40
 			fi
 			kubectl get pods --all-namespaces
-		else
 		fi
 
 		# apply performance test
