@@ -18,7 +18,7 @@ main() {
 		setupArgs+=(--platform ${INPUT_PLATFORM})
 	fi
 
-	"$SCRIPT_DIR/meshery.sh" "${setupArgs[@]}"
+	bash "$SCRIPT_DIR/meshery.sh" "${setupArgs[@]}"
 
 	commandArgs=()
 	if [[ -n "${INPUT_PROFILE_FILENAME:-}" ]]; then
@@ -29,7 +29,7 @@ main() {
 		commandArgs=(--profile-name ${INPUT_PROFILE_NAME})
 	fi
 
-	"$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
+	bash "$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
 }
 
 get_dependencies() {
