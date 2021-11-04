@@ -1,0 +1,55 @@
+name: Scheduled Benchmark Tests
+on:
+  # for triggering manually, provide a token
+  workflow_dispatch:
+    inputs:
+      provider_token:
+        description: "token for remote provider"
+        required: false
+      profile_name:
+        description: "performance profile to use"
+        required: false
+        default: istio-benchmark
+  # scheduled to run at every Thursday at 13:22
+  schedule:
+    - cron: '22 13 * * THU'
+
+jobs:
+  manual-test:
+    name: Manual Benchmark Test
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Setup Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.1
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.22.2'
+          driver: docker
+        
+      - name: Run Benchmark Tests
+        uses: ../../
+        with:
+          provider_token: ${{ github.event.inputs.provider_token }}
+          platform: docker
+          profile_name: ${{ github.event.inputs.profile_name }}
+
+  scheduled-test:
+    name: Scheduled Benchmark Test
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' }}
+    steps:
+      - name: Setup Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.1
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.22.2'
+          driver: docker
+        
+      - name: Run Benchmark Tests
+        uses: ../../
+        with:
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
+          platform: kubernetes
+          profile_name: istio-benchmark
+          
