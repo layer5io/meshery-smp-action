@@ -28,7 +28,7 @@ jobs:
           driver: docker
         
       - name: Run Benchmark Tests
-        uses: ./
+        uses: layer5io/meshery-smp-action
         with:
           provider_token: ${{ github.event.inputs.provider_token }}
           platform: docker
@@ -47,7 +47,7 @@ jobs:
           driver: docker
         
       - name: Run Benchmark Tests
-        uses: ./
+        uses: layer5io/meshery-smp-action
         with:
           provider_token: ${{ secrets.MESHERY_TOKEN }}
           platform: kubernetes
