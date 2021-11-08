@@ -26,6 +26,10 @@ jobs:
           minikube version: 'v1.23.2'
           kubernetes version: 'v1.22.2'
           driver: docker
+
+      - name: Install Service Mesh and Deploy Application
+        run: |
+          ./scripts/istio_deploy.sh
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
@@ -45,10 +49,14 @@ jobs:
           minikube version: 'v1.23.2'
           kubernetes version: 'v1.22.2'
           driver: docker
+
+      - name: Install Service Mesh and Deploy Application
+        run: |
+          ./scripts/istio_deploy.sh
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
         with:
           provider_token: ${{ secrets.MESHERY_TOKEN }}
-          platform: kubernetes
+          platform: docker
           profile_name: istio-benchmark
