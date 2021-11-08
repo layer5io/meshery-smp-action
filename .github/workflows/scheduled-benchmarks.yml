@@ -27,9 +27,14 @@ jobs:
           kubernetes version: 'v1.22.2'
           driver: docker
 
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
       - name: Install Service Mesh and Deploy Application
         run: |
-          ./scripts/istio_deploy.sh
+          chmod +x .github/workflows/scripts/istio_deploy.sh
+          .github/workflows/scripts/istio_deploy.sh
+        shell: bash
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
@@ -50,9 +55,14 @@ jobs:
           kubernetes version: 'v1.22.2'
           driver: docker
 
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
       - name: Install Service Mesh and Deploy Application
         run: |
-          ./scripts/istio_deploy.sh
+          chmod +x .github/workflows/scripts/istio_deploy.sh
+          .github/workflows/scripts/istio_deploy.sh
+        shell: bash
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
