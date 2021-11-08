@@ -43,8 +43,6 @@ main() {
 
 			mesheryctl system config minikube -t ~/auth.json
 
-			mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
-
 		fi
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json
 
