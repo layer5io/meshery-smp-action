@@ -30,6 +30,12 @@ inputs:
     description: "Name of the performance profile"
     required: false
 
+  # overrides the endpoint_url specified in the tes configuration file
+  # use this for dynamically injecting the application endpoint while running the workflow
+  endpoint_url:
+    description: "Endpoint in which the application is deployed"
+    required: false
+
 runs:
   using: "node12"
   main: "main.js"

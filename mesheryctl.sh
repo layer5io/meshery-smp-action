@@ -16,6 +16,7 @@ adapters["traefik_mesh"]=meshery-traefik-mesh:10006
 main() {
 	local perf_filename=
 	local perf_profile_name=
+	local endpoint_url=
 
 	parse_command_line "$@"
 
@@ -34,14 +35,13 @@ main() {
 		docker network connect minikube meshery_meshery_1
 		mesheryctl system config minikube -t ~/auth.json
 
-		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url"
 
 	else
 
 		# get the mesh name from performance test config
 		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
 
-		# deploy the mentioned service mesh if needed
 		if [[ $service_mesh != "null" ]]
 		then
 
@@ -79,6 +79,15 @@ parse_command_line() {
 					shift
 				else
 					echo "ERROR: '--profile-id' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--endpoint-url)
+				if [[ -n "${2:-}" ]]; then
+					endpoint_url=$2
+					shift
+				else
+					echo "ERROR: '--endpoint-url' cannot be empty." >&2
 					exit 1
 				fi
 				;;

@@ -29,6 +29,10 @@ main() {
 		commandArgs=(--profile-name ${INPUT_PROFILE_NAME})
 	fi
 
+	if [[ -n "${INPUT_ENDPOINT_URL:-}" ]]; then
+		commandArgs=(--endpoint-url ${INPUT_ENDPOINT_URL})
+	fi
+
 	"$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
 }
 
