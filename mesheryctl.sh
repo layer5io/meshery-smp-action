@@ -35,6 +35,9 @@ main() {
 		docker network connect minikube meshery_meshery_1
 		mesheryctl system config minikube -t ~/auth.json
 
+		echo "Configuration file: $perf_filename"
+		echo "Endpoint URL: $endpoint_url"
+
 		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url"
 
 	else
