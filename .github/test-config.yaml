@@ -1,0 +1,19 @@
+test:
+  smp_version: v0.0.1
+  name: istio-test
+  labels: {}
+  clients:
+    - internal: false
+      load_generator: fortio
+      protocol: 1
+      connections: 2
+      rps: 5
+      headers: {}
+      cookies: {}
+      body: ''
+      content_type: ''
+      endpoint_urls:
+        - 'https://meshery.io'
+  duration: 6s
+mesh:
+  type: 3

@@ -14,3 +14,4 @@ export INGRESS_HOST=$(minikube ip)
 export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 minikube tunnel &
 echo "$GATEWAY_URL"
+echo "ENDPOINT_URL=$GATEWAY_URL" >> $GITHUB_ENV
