@@ -30,7 +30,7 @@ main() {
 	fi
 
 	if [[ -n "${INPUT_ENDPOINT_URL:-}" ]]; then
-		commandArgs=(--endpoint-url ${INPUT_ENDPOINT_URL})
+		commandArgs+=(--endpoint-url ${INPUT_ENDPOINT_URL})
 	fi
 
 	"$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
