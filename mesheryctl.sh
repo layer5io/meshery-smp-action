@@ -22,6 +22,17 @@ main() {
 	# perform the test given in the provided profile_id
 	if [ -z "$perf_profile_name" ]
 	then
+		for mesh in "${!adapters[@]}"
+		do
+			shortName=$(echo ${adapters["$mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
+
+			docker network connect bridge meshery_meshery-"$shortName"_1
+			docker network connect minikube meshery_meshery-"$shortName"_1
+		done
+
+		docker network connect bridge meshery_meshery_1
+		docker network connect minikube meshery_meshery_1
+		mesheryctl system config minikube -t ~/auth.json
 
 		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json
 
