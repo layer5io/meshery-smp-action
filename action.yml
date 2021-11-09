@@ -13,6 +13,7 @@ inputs:
   platform:
     description: "Platform to deploy Meshery to. Allowed values: docker, kubernetes"
     default: docker
+    required: false
 
   # provide either a test configuration file or a performance profile name
 
@@ -21,11 +22,19 @@ inputs:
   # store this file in the .github folder in your repository
   profile_filename:
     description: "Name of the test configuration file"
+    required: false
 
   # name of the performance profile to use to run tests
   # see: https://docs.meshery.io/functionality/performance-management#performance-profiles
   profile_name:
     description: "Name of the performance profile"
+    required: false
+
+  # overrides the endpoint_url specified in the tes configuration file
+  # use this for dynamically injecting the application endpoint while running the workflow
+  endpoint_url:
+    description: "Endpoint in which the application is deployed"
+    required: false
 
 runs:
   using: "node12"
