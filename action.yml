@@ -30,10 +30,28 @@ inputs:
     description: "Name of the performance profile"
     required: false
 
-  # overrides the endpoint_url specified in the tes configuration file
-  # use this for dynamically injecting the application endpoint while running the workflow
+  # overrides the endpoint_url specified in the test configuration file
+  # use this for dynamically injecting the application endpoint while using the action
   endpoint_url:
     description: "Endpoint in which the application is deployed"
+    required: false
+
+  # overrides the mesh type specified in the test configuration file
+  # use this for dynamically injecting the service mesh while using the action
+  service_mesh:
+    description: "Service Mesh which is being tested"
+    required: false
+
+  # overrides the name specified in the test configuration file
+  # use this for dynamically injecting the test name while using the action
+  test_name:
+    description: "Name of the test"
+    required: false
+
+  # overrides the load generator specified in the test configuration file
+  # use this for dynamically injecting the load generator to test with while using the action
+  load_generator:
+    description: "Load generator to run tests with"
     required: false
 
 runs:

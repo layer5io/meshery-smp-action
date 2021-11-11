@@ -17,6 +17,9 @@ main() {
 	local perf_filename=
 	local perf_profile_name=
 	local endpoint_url=
+	local service_mesh=
+	local test_name=
+	local load_generator=
 
 	parse_command_line "$@"
 
@@ -37,8 +40,11 @@ main() {
 
 		echo "Configuration file: $perf_filename"
 		echo "Endpoint URL: $endpoint_url"
+		echo "Service Mesh: $service_mesh"
+		echo "Test Name: $test_name"
+		echo "Load Generator: $load_generator"
 
-		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url"
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator"
 
 	else
 
@@ -91,6 +97,33 @@ parse_command_line() {
 					shift
 				else
 					echo "ERROR: '--endpoint-url' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--service-mesh)
+				if [[ -n "${2:-}" ]]; then
+					service_mesh=$2
+					shift
+				else
+					echo "ERROR: '--service-mesh' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--test-name)
+				if [[ -n "${2:-}" ]]; then
+					test_name=$2
+					shift
+				else
+					echo "ERROR: '--test-name' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--load-generator)
+				if [[ -n "${2:-}" ]]; then
+					load_generator=$2
+					shift
+				else
+					echo "ERROR: '--load-generator' cannot be empty." >&2
 					exit 1
 				fi
 				;;
