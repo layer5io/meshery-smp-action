@@ -13,5 +13,7 @@ export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressga
 export INGRESS_HOST=$(minikube ip)
 export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 minikube tunnel &
+export SERVICE_MESH=3
 echo "$GATEWAY_URL"
 echo "ENDPOINT_URL=$GATEWAY_URL" >> $GITHUB_ENV
+echo "ENDPOINT_URL=$SERVICE_MESH" >> $GITHUB_ENV

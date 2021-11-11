@@ -33,6 +33,10 @@ main() {
 		commandArgs+=(--endpoint-url ${INPUT_ENDPOINT_URL})
 	fi
 
+	if [[ -n "${INPUT_SERVICE_MESH:-}" ]]; then
+		commandArgs+=(--service-mesh ${INPUT_SERVICE_MESH})
+	fi
+
 	bash "$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
 }
 
