@@ -37,6 +37,14 @@ main() {
 		commandArgs+=(--service-mesh ${INPUT_SERVICE_MESH})
 	fi
 
+	if [[ -n "${INPUT_TEST_NAME:-}" ]]; then
+		commandArgs+=(--test-name ${INPUT_TEST_NAME})
+	fi
+
+	if [[ -n "${INPUT_LOAD_GENERATOR:-}" ]]; then
+		commandArgs+=(--load-generator ${INPUT_LOAD_GENERATOR})
+	fi
+
 	bash "$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
 }
 
