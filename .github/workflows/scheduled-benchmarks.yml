@@ -3,19 +3,15 @@
 
 name: Scheduled Benchmark Tests
 on:
-  # for triggering manually, provide a token, a test configuration file name or a performance profile name
+  # for triggering manually, provide a test configuration file name or a performance profile name
   workflow_dispatch:
-    inputs:
-      provider_token:
-        description: "token for remote provider"
-        required: false
       profile_name:
         description: "performance profile to use"
         required: false
       profile_filename:
         description: "test configuration file"
         required: false
-  # scheduled to run at every Thursday at 13:22
+  # scheduled to run at everyday at 13:22
   schedule:
     - cron: '22 13 * * *'
 
@@ -27,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service-mesh: ['istio', 'linkerd', 'osm']
+        service-mesh: ['istio', 'linkerd']
         load-generator: ['fortio', 'wrk2']
     steps:
       - name: Setup Kubernetes
@@ -49,7 +45,7 @@ jobs:
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
         with:
-          provider_token: ${{ github.event.inputs.provider_token }}
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
           platform: docker
           profile_name: ${{ github.event.inputs.profile_name }}
           profile_filename: ${{ github.event.inputs.profile_filename }}
