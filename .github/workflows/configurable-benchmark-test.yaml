@@ -3,12 +3,9 @@
 
 name: Configurable Benchmark Test
 on:
-  # for triggering manually, provide a token
+  # for triggering the workflow, provide these inputs
   workflow_dispatch:
     inputs:
-      provider_token:
-        description: "token for remote provider"
-        required: false
       profile_name:
         description: "performance profile to use"
         required: false
@@ -17,16 +14,14 @@ on:
         required: false
       service_mesh:
         type: choice
+        required: false
         description: "service mesh being tested"
         options:
-          - app-mesh
-          - consul
           - istio
-          - kuma
           - linkerd
-          - osm
       load_generator:
         type: choice
+        required: false
         description: "load generator to run tests with"
         options:
           - fortio
@@ -38,11 +33,6 @@ jobs:
     name: Configurable Benchmark Test
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        service-mesh: ['istio', 'linkerd', 'osm']
-        load-generator: ['fortio', 'wrk2']
     steps:
       - name: Setup Kubernetes
         uses: manusa/actions-setup-minikube@v2.4.1
@@ -56,18 +46,18 @@ jobs:
 
       - name: Install Service Mesh and Deploy Application
         run: |
-          chmod +x .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
-          .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+          chmod +x .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
+          .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
         shell: bash
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
         with:
-          provider_token: ${{ github.event.inputs.provider_token }}
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
           platform: docker
           profile_name: ${{ github.event.inputs.profile_name }}
           profile_filename: ${{ github.event.inputs.profile_filename }}
           endpoint_url: ${{env.ENDPOINT_URL}}
           service_mesh: ${{env.SERVICE_MESH}}
-          load_generator: ${{ matrix.load-generator }}
-          test_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ github.event.inputs.profile_filename }}${{ github.event.inputs.profile_name }}'
+          load_generator: ${{ github.event.inputs.load_generator }}
+          test_name: '${{ github.event.inputs.service_mesh }}-${{ github.event.inputs.load_generator }}-${{ github.event.inputs.profile_filename }}${{ github.event.inputs.profile_name }}'
