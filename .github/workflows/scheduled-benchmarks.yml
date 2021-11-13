@@ -5,6 +5,7 @@ name: Scheduled Benchmark Tests
 on:
   # for triggering manually, provide a test configuration file name or a performance profile name
   workflow_dispatch:
+    inputs:
       profile_name:
         description: "performance profile to use"
         required: false
