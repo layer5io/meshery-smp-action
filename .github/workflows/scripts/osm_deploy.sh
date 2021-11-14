@@ -6,7 +6,7 @@
 
 # See: https://github.com/service-mesh-performance/service-mesh-performance/blob/master/protos/service_mesh.proto
 export MESH_NAME='Open Service Mesh'
-export SERVICE_MESH='10'
+export SERVICE_MESH='OPEN_SERVICE_MESH'
 
 system=$(uname -s)
 release=v0.11.1
