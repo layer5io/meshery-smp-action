@@ -6,7 +6,7 @@
 
 # See: https://github.com/service-mesh-performance/service-mesh-performance/blob/master/protos/service_mesh.proto
 export MESH_NAME='Linkerd'
-export SERVICE_MESH=5
+export SERVICE_MESH='LINKERD'
 
 curl -fsL https://run.linkerd.io/install | sh
 export PATH=$PATH:/home/runner/.linkerd2/bin
