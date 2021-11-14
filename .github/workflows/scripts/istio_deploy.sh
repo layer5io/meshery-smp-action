@@ -6,7 +6,7 @@
 
 # See: https://github.com/service-mesh-performance/service-mesh-performance/blob/master/protos/service_mesh.proto
 export MESH_NAME='Istio'
-export SERVICE_MESH=3
+export SERVICE_MESH='ISTIO'
 
 curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.11.4 sh -
 cd istio-1.11.4
