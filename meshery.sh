@@ -37,9 +37,6 @@ main() {
 
 	curl -L https://git.io/meshery | DEPLOY_MESHERY=false bash -
 
-	mesheryctl system context create new-context --platform $PLATFORM --url http://localhost:9081 --set --yes
-	mesheryctl system channel set edge-latest
-
 	mesheryctl system start --yes
 
 	sleep 60
