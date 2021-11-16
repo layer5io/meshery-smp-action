@@ -1,40 +1,166 @@
-# Meshery SMP Action
-This repository is used for storing a GitHub action for performing SMP tests using Meshery
+# Meshery - SMP GitHub Action
 
-## Inputs
+GitHub Action to run SMP Performance Benchmarks on CI/CD pipelines.
+
+[Meshery](https://meshery.io/) is the canonical implementation of the [Service Mesh Performance specification](https://smp-spec.io/).
+
+## Learn More
+
+- [Performance Management in Meshery](https://docs.meshery.io/functionality/performance-management)
+- [Guide: Running Performance Tests in Meshery](https://docs.meshery.io/guides/performance-management)
+
+## Supported Service Meshes
+
+Meshery supports 10 different service meshes.
+
+<details>
+  <summary><strong>See all Supported Service Meshes</strong></summary>
+<div class="container flex">
+  <div class="text editable">
+    <p>Service mesh adapters provision, configure, and manage their respective service meshes.
+      <table class="adapters">
+        <thead style="display:none;">
+          <th>Status</th>
+          <th>Adapter</th>
+        </thead>
+        <tbody>
+        <tr>
+          <td rowspan="9" class="stable-adapters">stable</td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/layer5io/meshery-istio">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/istio.svg' alt='Meshery Adapter for Istio Service Mesh' align="middle" hspace="10px" vspace="5px" height="30px" > Meshery adapter for Istio</a>
+          </td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/layer5io/meshery-linkerd">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/linkerd.svg' alt='Linkerd' align="middle" hspace="5px" vspace="5px" height="30px" width="30px"> Meshery adapter for Linkerd</a>
+          </td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/layer5io/meshery-consul">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/consul.svg' alt='Consul Connect' align="middle" hspace="5px" vspace="5px" height="30px" width="30px"> Meshery adapter for Consul</a>
+          </td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/layer5io/meshery-octarine">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/octarine.svg' alt='Octarine Service Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for Octarine</a>
+          </td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/layer5io/meshery-nsm">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/nsm.svg' alt='Network Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for Network Service Mesh</a>
+          </td>
+        </tr>
+         <tr>
+           <td><a href="https://github.com/layer5io/meshery-kuma">
+             <img src='https://docs.meshery.io/assets/img/service-meshes/kuma.svg' alt='Kuma Service Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for Kuma</a>
+           </td>
+        </tr>
+          <tr>
+          <td><a href="https://github.com/layer5io/meshery-osm">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/osm.svg' alt='Open Service Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for Open Service Mesh</a>
+          </td>
+        </tr>
+        <tr><td colspan="2" class="stable-adapters"></td></tr>
+        <tr>
+          <td rowspan="5" class="beta-adapters">beta</td>
+        </tr>
+         <tr>
+          <td><a href="https://github.com/layer5io/meshery-cpx">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/citrix.svg' alt='Citrix CPX Service Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for Citrix CPX</a>
+          </td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/layer5io/meshery-traefik-mesh">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/traefik-mesh.svg' alt='Traefik Service Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for Traefik Mesh</a>
+          </td>
+        </tr>
+           <tr>
+          <td><a href="https://github.com/meshery/meshery-nginx-sm">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/nginx-sm.svg' alt='NGINX Service Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for NGINX Service Mesh</a>
+          </td>
+        </tr>
+        <tr><td colspan="2" class="beta-adapters"></td></tr>
+        <tr>
+          <td rowspan="3" class="alpha-adapters">alpha</td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/meshery/meshery-tanzu-sm">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/tanzu.svg' alt='Tanzu Service Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for Tanzu SM</a>
+          </td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/meshery/meshery-app-mesh">
+            <img src='https://docs.meshery.io/assets/img/service-meshes/app-mesh.svg' alt='AWS App Mesh Service Mesh' align="middle" hspace="5px" vspace="5px" height="30px" width="30px">Meshery adapter for App Mesh</a>
+          </td>
+        </tr>
+        <tr><td colspan="2" class="alpha-adapters"></td></tr>
+        </tbody>
+    </table>
+  </p>
+</div>
+ </details>
+
+## Usage
+
+See [action.yml](action.yml)
+
+You can use this action by defining your test configuration in a performance profile in Meshery or write your test configurations in SMP compatible format ([see example](#smp-compatible-test-configuration-file)).
+
+You can then pass in either of these to the action to run a performance test.
+
+The results of the tests are updated on the Performance Management dashboard in Meshery.
+
+See [Performance Management with Meshery](https://docs.meshery.io/guides/performance-management) for detailed instructions on setting up Meshery and authenticating the GitHub Action.
+
+## SMP Compatible Test Configuration File
+
 ```yaml
-  # token to connect with the remote provider
-  provider_token:
-    description: "Provider token to use. NOTE: value of the 'token' key in auth.json"
-    required: true
+# Test configuration file for running performance benchmarks
+# See: https://docs.meshery.io/guides/performance-management#running-performance-benchmarks-through-mesheryctl
+test:
+  smp_version: v0.0.1
+  
+  # The name of the test
+  name: Load Test
+  labels: {}
+  
+  # Test configuration to be defined here
+  clients:
+    - internal: false
+      load_generator: fortio
+      protocol: 1
+      connections: 2
+      rps: 10
+      headers: {}
+      cookies: {}
+      body: ''
+      content_type: ''
+      endpoint_urls:
+        - 'https://smp-spec.io'
+  duration: 60s
 
-  # platform to deploy meshery
-  platform:
-    description: "Platform to deploy meshery on. Possible values: docker, kubernetes"
-    default: docker
-
-  # SUPPLY EITHER "profile_filename" or profile_name
-
-  # name of the file storing the performance profile (keep in .github)
-  profile_filename:
-    description: "Name of the file containing SMP profile"
-
-  # name of the prformance profile to use
-  profile_name:
-    description: "Name of the performance profile"
+# Service mesh under test in Service Mesh Performance Spec format
+# See: https://github.com/service-mesh-performance/service-mesh-performance/blob/master/protos/service_mesh.proto
+mesh:
+  type: 3
 ```
 
 ## Sample configuration
+
+See [scheduled-benchmarks.yml](.github/workflows/scheduled-benchmarks.yml) and [configurable-benchmark-test.yml](.github/workflows/configurable-benchmark-test.yaml) for more sample configurations.
+
 ```yaml
-name: Testing SMP action
+name: Meshery SMP Action
 on:
   push:
     branches:
-      'perf'
+      'master'
 
 jobs:
-  job1:
-    name: Run Performance Test
+  performance-test:
+    name: Performance Test
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -42,22 +168,20 @@ jobs:
         with:
           ref: 'perf'
 
-      - name: Deploy k8s
+      - name: Deploy k8s-minikube
         uses: manusa/actions-setup-minikube@v2.4.1
         with:
           minikube version: 'v1.21.0'
           kubernetes version: 'v1.20.7'
           driver: docker
 
-      - name: Performance test
+      - name: Run Performance Test
         uses: layer5io/meshery-smp-action@master
         with:
           provider_token: ${{ secrets.PROVIDER_TOKEN }}
           platform: docker
-          profile_name: demo
+          profile_name: soak-test
 ```
-
-<div>&nbsp;</div>
 
 ## Join the service mesh community!
 

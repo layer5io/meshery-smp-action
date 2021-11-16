@@ -1,27 +1,58 @@
-name: "Service Mesh Performance Testing with Meshery"
-description: "Validate SMP specification using Meshery"
+name: "Performance Testing with Meshery"
+description: "Run performance tests in SMP format with Meshery"
 author: "Layer5"
 
 inputs:
-  # token to connect with the remote provider
+  # token to authenticate with Meshery
+  # see: https://docs.meshery.io/guides/performance-management#running-performance-benchmarks-in-your-pipelines
   provider_token:
     description: "Provider token to use. NOTE: value of the 'token' key in auth.json"
     required: true
 
-  # platform to deploy meshery
+  # platform to deploy Meshery to
   platform:
-    description: "Platform to deploy meshery on. Possible values: docker, kubernetes"
+    description: "Platform to deploy Meshery to. Allowed values: docker, kubernetes"
     default: docker
+    required: false
 
-  # SUPPLY EITHER "profile_filename" or profile_name
+  # provide either a test configuration file or a performance profile name
 
-  # name of the file storing the performance profile (keep in .github)
+  # name of the test configuration file written in SMP compatible format
+  # see: https://docs.meshery.io/guides/performance-management#running-performance-benchmarks-through-mesheryctl
+  # store this file in the .github folder in your repository
   profile_filename:
-    description: "Name of the file containing SMP profile"
+    description: "Name of the test configuration file"
+    required: false
 
-  # name of the prformance profile to use
+  # name of the performance profile to use to run tests
+  # see: https://docs.meshery.io/functionality/performance-management#performance-profiles
   profile_name:
     description: "Name of the performance profile"
+    required: false
+
+  # overrides the endpoint_url specified in the test configuration file
+  # use this for dynamically injecting the application endpoint while using the action
+  endpoint_url:
+    description: "Endpoint in which the application is deployed"
+    required: false
+
+  # overrides the mesh type specified in the test configuration file
+  # use this for dynamically injecting the service mesh while using the action
+  service_mesh:
+    description: "Service Mesh which is being tested"
+    required: false
+
+  # overrides the name specified in the test configuration file
+  # use this for dynamically injecting the test name while using the action
+  test_name:
+    description: "Name of the test"
+    required: false
+
+  # overrides the load generator specified in the test configuration file
+  # use this for dynamically injecting the load generator to test with while using the action
+  load_generator:
+    description: "Load generator to run tests with"
+    required: false
 
 runs:
   using: "node12"

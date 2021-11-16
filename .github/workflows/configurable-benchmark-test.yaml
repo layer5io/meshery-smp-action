@@ -1,0 +1,63 @@
+# This workflow runs performance benchmarks with Meshery based on the configuration provided
+# This workflow needs to be triggered manually by providing the test configuration
+
+name: Configurable Benchmark Test
+on:
+  # for triggering the workflow, provide these inputs
+  workflow_dispatch:
+    inputs:
+      profile_name:
+        description: "performance profile to use"
+        required: false
+      profile_filename:
+        description: "test configuration file"
+        required: false
+      service_mesh:
+        type: choice
+        required: false
+        description: "service mesh being tested"
+        options:
+          - istio
+          - linkerd
+      load_generator:
+        type: choice
+        required: false
+        description: "load generator to run tests with"
+        options:
+          - fortio
+          - wrk2
+          - nighthawk
+
+jobs:
+  manual-test:
+    name: Configurable Benchmark Test
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Setup Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.1
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.22.2'
+          driver: docker
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Service Mesh and Deploy Application
+        run: |
+          chmod +x .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
+          .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
+        shell: bash
+        
+      - name: Run Benchmark Tests
+        uses: layer5io/meshery-smp-action@master
+        with:
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
+          platform: docker
+          profile_name: ${{ github.event.inputs.profile_name }}
+          profile_filename: ${{ github.event.inputs.profile_filename }}
+          endpoint_url: ${{env.ENDPOINT_URL}}
+          service_mesh: ${{env.SERVICE_MESH}}
+          load_generator: ${{ github.event.inputs.load_generator }}
+          test_name: '${{ github.event.inputs.service_mesh }}-${{ github.event.inputs.load_generator }}-${{ github.event.inputs.profile_filename }}${{ github.event.inputs.profile_name }}'

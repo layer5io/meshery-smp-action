@@ -1,0 +1,94 @@
+# This workflow runs performance benchmarks with Meshery based on the configuration provided
+# This workflow is scheduled to run daily but can also be triggered manually
+
+name: Scheduled Benchmark Tests
+on:
+  # for triggering manually, provide a test configuration file name or a performance profile name
+  workflow_dispatch:
+    inputs:
+      profile_name:
+        description: "performance profile to use"
+        required: false
+      profile_filename:
+        description: "test configuration file"
+        required: false
+  # scheduled to run at everyday at 13:22
+  schedule:
+    - cron: '22 13 * * *'
+
+jobs:
+  manual-test:
+    name: Manual Benchmark Test
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service-mesh: ['istio', 'linkerd']
+        load-generator: ['fortio', 'wrk2']
+    steps:
+      - name: Setup Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.1
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.22.2'
+          driver: docker
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Service Mesh and Deploy Application
+        run: |
+          chmod +x .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+          .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+        shell: bash
+        
+      - name: Run Benchmark Tests
+        uses: layer5io/meshery-smp-action@master
+        with:
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
+          platform: docker
+          profile_name: ${{ github.event.inputs.profile_name }}
+          profile_filename: ${{ github.event.inputs.profile_filename }}
+          endpoint_url: ${{env.ENDPOINT_URL}}
+          service_mesh: ${{env.SERVICE_MESH}}
+          load_generator: ${{ matrix.load-generator }}
+          test_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ github.event.inputs.profile_filename }}${{ github.event.inputs.profile_name }}'
+
+  scheduled-test:
+    name: Scheduled Benchmark Test
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service-mesh: ['istio', 'linkerd', 'osm']
+        load-generator: ['fortio', 'wrk2']
+        test-configuration: ['load-test.yaml','soak-test.yaml']
+    steps:
+      - name: Setup Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.1
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.22.2'
+          driver: docker
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Service Mesh and Deploy Application
+        run: |
+          chmod +x .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+          .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+        shell: bash
+        
+      - name: Run Benchmark Tests
+        uses: layer5io/meshery-smp-action@master
+        with:
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
+          platform: docker
+          profile_filename: ${{ matrix.test-configuration }}
+          endpoint_url: ${{env.ENDPOINT_URL}}
+          service_mesh: ${{env.SERVICE_MESH}}
+          load_generator: ${{ matrix.load-generator }}
+          test_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-{{ github.event.inputs.profile_name }}'

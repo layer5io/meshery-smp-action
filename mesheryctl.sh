@@ -23,6 +23,10 @@ adapters["traefik_mesh"]=meshery-traefik-mesh:10006
 main() {
 	local perf_filename=
 	local perf_profile_name=
+	local endpoint_url=
+	local service_mesh=
+	local test_name=
+	local load_generator=
 	local PLATFORM=docker
 
 	# load balancer
@@ -34,9 +38,25 @@ main() {
 	# perform the test given in the provided profile_id
 	if [ -z "$perf_profile_name" ]
 	then
+		for mesh in "${!adapters[@]}"
+		do
+			shortName=$(echo ${adapters["$mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
 
-		echo "running performance test specified in $perf_filename..."
-		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json
+			docker network connect bridge meshery_meshery-"$shortName"_1
+			docker network connect minikube meshery_meshery-"$shortName"_1
+		done
+
+		docker network connect bridge meshery_meshery_1
+		docker network connect minikube meshery_meshery_1
+		mesheryctl system config minikube -t ~/auth.json
+
+		echo "Configuration file: $perf_filename"
+		echo "Endpoint URL: $endpoint_url"
+		echo "Service Mesh: $service_mesh"
+		echo "Test Name: $test_name"
+		echo "Load Generator: $load_generator"
+
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator"
 
 	else
 
@@ -45,7 +65,6 @@ main() {
 		mesheryctl perf view $perf_profile_name -t ~/auth.json -o yaml
 		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
 
-		# deploy the mentioned service mesh if needed
 		if [[ $service_mesh != "null" ]]
 		then
 
@@ -65,17 +84,17 @@ main() {
 				sleep 40
 			else
 				# --watch flag doesn't work for in cluster deployments
-				# sol: proper messaging system for events in meshery
 				echo "deploying service mesh..."
 				mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh"
 				echo "checking on $service_mesh deployments..."
 				sleep 40
 			fi
+
 			kubectl get pods --all-namespaces
 		fi
-
-		# apply performance test
+		# apply performance test given in named profile
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json
+
 	fi
 }
 
@@ -107,6 +126,42 @@ parse_command_line() {
 					shift
 				else
 					echo "ERROR: '-p|--platform' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--endpoint-url)
+				if [[ -n "${2:-}" ]]; then
+					endpoint_url=$2
+					shift
+				else
+					echo "ERROR: '--endpoint-url' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--service-mesh)
+				if [[ -n "${2:-}" ]]; then
+					service_mesh=$2
+					shift
+				else
+					echo "ERROR: '--service-mesh' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--test-name)
+				if [[ -n "${2:-}" ]]; then
+					test_name=$2
+					shift
+				else
+					echo "ERROR: '--test-name' cannot be empty." >&2
+					exit 1
+				fi
+				;;
+			--load-generator)
+				if [[ -n "${2:-}" ]]; then
+					load_generator=$2
+					shift
+				else
+					echo "ERROR: '--load-generator' cannot be empty." >&2
 					exit 1
 				fi
 				;;
