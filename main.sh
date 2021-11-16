@@ -48,6 +48,17 @@ main() {
 		commandArgs+=(--load-generator ${INPUT_LOAD_GENERATOR})
 	fi
 
+	if [[ -n "${INPUT_MESH_DEPLOYED:-}" ]]; then
+		boolLower=`echo $INPUT_MESH_DEPLOYED  | tr -d '"' | tr '[:upper:]' '[:lower:]'`
+		if [[ $boolLower != "true" && $boolLower != "false" ]]
+		then
+			echo "mesh_deployed should be set to 'true' or 'false'"
+			exit 1
+		else
+			commandArgs+=(--mesh-deployed ${boolLower})
+		fi
+	fi
+
 	bash "$SCRIPT_DIR/mesheryctl.sh" "${commandArgs[@]}"
 }
 

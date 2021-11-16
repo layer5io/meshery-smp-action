@@ -27,6 +27,7 @@ main() {
 	local service_mesh=
 	local test_name=
 	local load_generator=
+	local mesh_deployed=
 	local PLATFORM=docker
 
 	# load balancer
@@ -44,16 +45,11 @@ main() {
 		then
 			shortName=$(echo ${adapters["$service_mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
 			docker_networking "$shortName"
+		fi
 
-			echo "deploying service mesh..."
-			mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
-			sleep 40
-		else
-			# --watch flag doesn't work for in cluster deployments
-			echo "deploying service mesh..."
-			mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh"
-			echo "checking on $service_mesh deployments..."
-			sleep 40
+		if [[ $mesh_deployed != "true" ]]
+		then
+			deploy_mesh "$service_mesh" "$PLATFORM"
 		fi
 
 		kubectl get pods --all-namespaces
@@ -76,26 +72,18 @@ main() {
 
 		if [[ $service_mesh != "null" ]]
 		then
-
 			shortName=$(echo ${adapters["$service_mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
-
 			if [[ $PLATFORM == "docker" ]]
 			then
 				docker_networking "$shortName"
-
-				echo "deploying service mesh..."
-				mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
-				sleep 40
-			else
-				# --watch flag doesn't work for in cluster deployments
-				echo "deploying service mesh..."
-				mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh"
-				echo "checking on $service_mesh deployments..."
-				sleep 40
 			fi
-
-			kubectl get pods --all-namespaces
+			if [[ $mesh_deployed != "true" ]]
+			then
+				deploy_mesh "$service_mesh" "$PLATFORM"
+			fi
 		fi
+
+		kubectl get pods --all-namespaces
 		echo "Configuration file: $perf_profile_name"
 		echo "Endpoint URL: $endpoint_url"
 		echo "Service Mesh: $service_mesh"
@@ -175,6 +163,15 @@ parse_command_line() {
 					exit 1
 				fi
 				;;
+			--mesh-deployed)
+				if [[ -n "${2:-}" ]]; then
+					mesh_deployed=$2
+					shift
+				else
+					echo "ERROR: '--mesh-deployed' cannot be empty." >&2
+					exit 1
+				fi
+				;;
 			*)
 				break
 				;;
@@ -192,6 +189,21 @@ docker_networking() {
 		mesheryctl system config minikube -t ~/auth.json
 
 		docker ps
+}
+
+deploy_mesh() {
+	if [[ $2 == "docker" ]]
+	then
+		echo "deploying service mesh..."
+		mesheryctl mesh deploy --adapter ${adapters["$1"]} -t ~/auth.json "$1" --watch
+		sleep 40
+	else
+		# --watch flag doesn't work for in cluster deployments
+		echo "deploying service mesh..."
+		mesheryctl mesh deploy --adapter ${adapters["$1"]} -t ~/auth.json "$1"
+		echo "checking on $service_mesh deployments..."
+		sleep 40
+	fi
 }
 
 main "$@"

@@ -54,6 +54,11 @@ inputs:
     description: "Load generator to run tests with"
     required: false
 
+  # set to true if you are bringing your own cluster with a service mesh installed
+  mesh_deployed:
+    description: "Set to true for custom service mesh deployments other than the latest release."
+    required: true
+
 runs:
   using: "node12"
   main: "main.js"
