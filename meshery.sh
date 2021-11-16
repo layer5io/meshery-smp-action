@@ -37,7 +37,7 @@ main() {
 
 	curl -L https://git.io/meshery | DEPLOY_MESHERY=false bash -
 
-	mesheryctl system start --yes
+	mesheryctl system start -p $PLATFORM --yes
 
 	sleep 60
 }
