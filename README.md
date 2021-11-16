@@ -117,26 +117,39 @@ See [Performance Management with Meshery](https://docs.meshery.io/guides/perform
 ## SMP Compatible Test Configuration File
 
 ```yaml
-smp_version: v0.0.1
-id:
-name: Istio Performance Test
-labels: {}
-clients:
-- internal: false
-  load_generator: fortio
-  protocol: 1
-  connections: 2
-  rps: 10
-  headers: {}
-  cookies: {}
-  body: ""
-  content_type: ""
-  endpoint_urls:
-  - http://localhost:2323/productpage
-duration: "30m"
+# Test configuration file for running performance benchmarks
+# See: https://docs.meshery.io/guides/performance-management#running-performance-benchmarks-through-mesheryctl
+test:
+  smp_version: v0.0.1
+  
+  # The name of the test
+  name: Load Test
+  labels: {}
+  
+  # Test configuration to be defined here
+  clients:
+    - internal: false
+      load_generator: fortio
+      protocol: 1
+      connections: 2
+      rps: 10
+      headers: {}
+      cookies: {}
+      body: ''
+      content_type: ''
+      endpoint_urls:
+        - 'https://smp-spec.io'
+  duration: 60s
+
+# Service mesh under test in Service Mesh Performance Spec format
+# See: https://github.com/service-mesh-performance/service-mesh-performance/blob/master/protos/service_mesh.proto
+mesh:
+  type: 3
 ```
 
 ## Sample configuration
+
+See [scheduled-benchmarks.yml](.github/workflows/scheduled-benchmarks.yml) and [configurable-benchmark-test.yml](.github/workflows/configurable-benchmark-test.yaml) for more sample configurations.
 
 ```yaml
 name: Meshery SMP Action
@@ -167,7 +180,7 @@ jobs:
         with:
           provider_token: ${{ secrets.PROVIDER_TOKEN }}
           platform: docker
-          profile_name: istio-soak-test
+          profile_name: soak-test
 ```
 
 ## Join the service mesh community!
