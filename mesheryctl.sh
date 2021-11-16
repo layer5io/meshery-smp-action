@@ -38,17 +38,25 @@ main() {
 	# perform the test given in the provided profile_id
 	if [ -z "$perf_profile_name" ]
 	then
-		for mesh in "${!adapters[@]}"
-		do
-			shortName=$(echo ${adapters["$mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
 
-			docker network connect bridge meshery_meshery-"$shortName"_1
-			docker network connect minikube meshery_meshery-"$shortName"_1
-		done
+		# connect containers and deploy service mesh
+		if [[ $PLATFORM == "docker" ]]
+		then
+			shortName=$(echo ${adapters["$service_mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
+			docker_networking "$shortName"
 
-		docker network connect bridge meshery_meshery_1
-		docker network connect minikube meshery_meshery_1
-		mesheryctl system config minikube -t ~/auth.json
+			echo "deploying service mesh..."
+			mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
+			sleep 40
+		else
+			# --watch flag doesn't work for in cluster deployments
+			echo "deploying service mesh..."
+			mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh"
+			echo "checking on $service_mesh deployments..."
+			sleep 40
+		fi
+
+		kubectl get pods --all-namespaces
 
 		echo "Configuration file: $perf_filename"
 		echo "Endpoint URL: $endpoint_url"
@@ -58,6 +66,7 @@ main() {
 
 		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator"
 
+	# perform test given in ID specified by perf_profile_name
 	else
 
 		# get the mesh name from performance test config
@@ -72,12 +81,7 @@ main() {
 
 			if [[ $PLATFORM == "docker" ]]
 			then
-				docker network connect bridge meshery_meshery_1
-				docker network connect minikube meshery_meshery_1
-				docker network connect bridge meshery_meshery-"$shortName"_1
-				docker network connect minikube meshery_meshery-"$shortName"_1
-				mesheryctl system config minikube -t ~/auth.json
-				docker ps
+				docker_networking "$shortName"
 
 				echo "deploying service mesh..."
 				mesheryctl mesh deploy --adapter ${adapters["$service_mesh"]} -t ~/auth.json "$service_mesh" --watch
@@ -92,6 +96,12 @@ main() {
 
 			kubectl get pods --all-namespaces
 		fi
+		echo "Configuration file: $perf_profile_name"
+		echo "Endpoint URL: $endpoint_url"
+		echo "Service Mesh: $service_mesh"
+		echo "Test Name: $test_name"
+		echo "Load Generator: $load_generator"
+
 		# apply performance test given in named profile
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json
 
@@ -171,6 +181,17 @@ parse_command_line() {
 		esac
 		shift
 	done
+}
+
+docker_networking() {
+		docker network connect bridge meshery_meshery-"$1"_1
+		docker network connect minikube meshery_meshery-"$1"_1
+
+		docker network connect bridge meshery_meshery_1
+		docker network connect minikube meshery_meshery_1
+		mesheryctl system config minikube -t ~/auth.json
+
+		docker ps
 }
 
 main "$@"
