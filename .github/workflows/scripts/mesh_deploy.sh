@@ -5,7 +5,7 @@ echo "Checking if mesheryctl is installed"
 if mesheryctl
 	
 then
-	echo found mesheryctl, deploying $MESH
+	echo "found mesheryctl, deploying $MESH"
 	mesheryctl mesh deploy $MESH
 	
 else
