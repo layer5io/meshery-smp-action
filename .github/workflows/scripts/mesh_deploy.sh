@@ -1,6 +1,6 @@
 MESH=$1
 
-echo "checking if mesheryctl is installed"
+echo "Checking if mesheryctl is installed"
 	
 if mesheryctl
 	
@@ -9,7 +9,7 @@ then
 	mesheryctl mesh deploy $MESH
 	
 else
-	printf "Mesherycyl not found. \nInstalling...\n"
+	printf "Mesheryctl not found. \nInstalling...\n"
 	install_mesheryctl
 	echo "Installed mesheryctl successfully!"
 	mesheryctl mesh deploy $MESH
