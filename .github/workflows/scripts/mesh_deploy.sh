@@ -6,7 +6,7 @@ if mesheryctl
 	
 then
 	echo found mesheryctl, deploying $MESH
-	mesheryctl mesh deploy $mesh
+	mesheryctl mesh deploy $MESH
 	
 else
 	printf "Mesherycyl not found. \nInstalling...\n"
