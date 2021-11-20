@@ -8,7 +8,7 @@
 export MESH_NAME='Open Service Mesh'
 export SERVICE_MESH='OPEN_SERVICE_MESH'
 
-system=$(uname -s)
+system=$(uname -s |  tr '[:upper:]' '[:lower:]')
 release=v0.11.1
 curl -L https://github.com/openservicemesh/osm/releases/download/${release}/osm-${release}-${system}-amd64.tar.gz | tar -vxzf - ./${system}-amd64/osm version
 osm install \
