@@ -42,6 +42,10 @@ jobs:
           chmod +x .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
           .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
         shell: bash
+
+      - name: Get Date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H.%M.%S')"
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
@@ -53,7 +57,7 @@ jobs:
           endpoint_url: ${{env.ENDPOINT_URL}}
           service_mesh: ${{env.SERVICE_MESH}}
           load_generator: ${{ matrix.load-generator }}
-          test_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ github.event.inputs.profile_filename }}${{ github.event.inputs.profile_name }}'
+          test_name: '${{ steps.date.outputs.date }}'
 
   scheduled-test:
     name: Scheduled Benchmark Test
@@ -81,6 +85,10 @@ jobs:
           chmod +x .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
           .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
         shell: bash
+
+      - name: Get Date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H.%M.%S')"
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
@@ -91,4 +99,5 @@ jobs:
           endpoint_url: ${{env.ENDPOINT_URL}}
           service_mesh: ${{env.SERVICE_MESH}}
           load_generator: ${{ matrix.load-generator }}
-          test_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-{{ github.event.inputs.profile_name }}'
+          profile_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ github.event.inputs.profile_filename }}${{ github.event.inputs.profile_name }}'
+          test_name: '${{ steps.date.outputs.date }}'
