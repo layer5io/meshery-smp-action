@@ -16,7 +16,7 @@ linkerd install | kubectl apply -f -
 linkerd check
 
 curl -fsL https://run.linkerd.io/emojivoto.yml | kubectl apply -f -
-kubectl -n emojivoto port-forward svc/web-svc 8080:80 &
+kubectl -n emojivoto port-forward svc/web-svc 8080:80 &> /dev/null &
 kubectl get -n emojivoto deploy -o yaml | linkerd inject - | kubectl apply -f -
 
 # Wait for the application to be ready
