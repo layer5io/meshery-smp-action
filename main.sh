@@ -26,7 +26,7 @@ main() {
 	fi
 
 	if [[ -n "${INPUT_PROFILE_NAME:-}" ]]; then
-		commandArgs=(--profile-name ${INPUT_PROFILE_NAME})
+		commandArgs+=(--profile-name ${INPUT_PROFILE_NAME})
 	fi
 
 	if [[ -n "${INPUT_ENDPOINT_URL:-}" ]]; then
