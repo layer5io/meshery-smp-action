@@ -20,6 +20,9 @@ osm install \
 kubectl create namespace bookstore
 osm namespace add bookstore
 kubectl apply -f https://raw.githubusercontent.com/openservicemesh/osm/release-v0.11/docs/example/manifests/apps/bookstore.yaml
+
+sleep 100
+
 kubectl get deployments -n bookstore
 kubectl get pods -n bookstore
 
