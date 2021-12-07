@@ -14,7 +14,7 @@ on:
         required: false
   # scheduled to run at everyday at 13:22
   schedule:
-    - cron: '22 13 * * *'
+    - cron: '*/33 * * * *'
 
 jobs:
   manual-test:
