@@ -24,7 +24,7 @@ main() {
 	parse_command_line "$@"
 
 	# perform the test given in the provided profile_id
-	if [ -z "$perf_profile_name" ]
+	if [ -z "$perf_filename" ]
 	then
 		# get the mesh name from performance test config
 		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
