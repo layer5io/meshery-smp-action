@@ -20,6 +20,9 @@ osm install \
 kubectl create namespace bookstore
 osm namespace add bookstore
 kubectl apply -f https://raw.githubusercontent.com/openservicemesh/osm/release-v0.11/docs/example/manifests/apps/bookstore.yaml
+
+sleep 100
+
 kubectl get deployments -n bookstore
 kubectl get pods -n bookstore
 
@@ -36,7 +39,7 @@ if [ -z "$backend" ]; then
 fi
 
 POD="$(kubectl get pods --selector app="$backend" -n "$BOOKSTORE_NAMESPACE" --no-headers | grep 'Running' | awk 'NR==1{print $1}')"
-kubectl port-forward "$POD" -n "$BOOKSTORE_NAMESPACE" 15000:15000
+kubectl port-forward "$POD" -n "$BOOKSTORE_NAMESPACE" 15000:15000 &> /dev/null &
 
 echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
 echo "Endpoint URL: http://localhost:15000"

@@ -99,5 +99,5 @@ jobs:
           endpoint_url: ${{env.ENDPOINT_URL}}
           service_mesh: ${{env.SERVICE_MESH}}
           load_generator: ${{ matrix.load-generator }}
-          profile_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ github.event.inputs.profile_filename }}${{ github.event.inputs.profile_name }}'
+          profile_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ matrix.test-configuration }}'
           test_name: '${{ steps.date.outputs.date }}'
