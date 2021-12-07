@@ -24,8 +24,26 @@ main() {
 	parse_command_line "$@"
 
 	# perform the test given in the provided profile_id
-	if [ -z "$perf_profile_name" ]
+	if [ -z "$perf_filename" ]
 	then
+		# get the mesh name from performance test config
+		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
+
+		if [[ $service_mesh != "null" ]]
+		then
+
+			shortName=$(echo ${adapters["$service_mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
+
+			docker network connect bridge meshery_meshery_1
+			docker network connect minikube meshery_meshery_1
+			docker network connect bridge meshery_meshery-"$shortName"_1
+			docker network connect minikube meshery_meshery-"$shortName"_1
+
+			mesheryctl system config minikube -t ~/auth.json
+		fi
+		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
+		
+	else
 		for mesh in "${!adapters[@]}"
 		do
 			shortName=$(echo ${adapters["$mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
@@ -45,27 +63,6 @@ main() {
 		echo "Load Generator: $load_generator"
 
 		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator" $perf_profile_name --yes
-
-	else
-
-		# get the mesh name from performance test config
-		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
-
-		if [[ $service_mesh != "null" ]]
-		then
-
-			shortName=$(echo ${adapters["$service_mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
-
-			docker network connect bridge meshery_meshery_1
-			docker network connect minikube meshery_meshery_1
-			docker network connect bridge meshery_meshery-"$shortName"_1
-			docker network connect minikube meshery_meshery-"$shortName"_1
-
-			mesheryctl system config minikube -t ~/auth.json
-
-		fi
-		mesheryctl perf apply $perf_profile_name -t ~/auth.json
-
 	fi
 }
 
