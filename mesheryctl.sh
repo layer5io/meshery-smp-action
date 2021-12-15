@@ -67,8 +67,8 @@ main() {
 
 		# get the mesh name from performance test config
 		echo "Using $perf_profile_name..."
-		mesheryctl perf view $perf_profile_name -t ~/auth.json -o yaml
-		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
+		mesheryctl perf profile $perf_profile_name -t ~/auth.json -o yaml
+		service_mesh=$(mesheryctl perf profile $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
 
 		if [[ $service_mesh != "null" ]]
 		then
