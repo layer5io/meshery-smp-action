@@ -60,7 +60,7 @@ main() {
 		echo "Test Name: $test_name"
 		echo "Load Generator: $load_generator"
 
-		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator"
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator" test-profile
 
 	# perform test given in ID specified by perf_profile_name
 	else
