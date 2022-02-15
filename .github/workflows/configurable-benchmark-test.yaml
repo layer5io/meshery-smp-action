@@ -52,7 +52,7 @@ jobs:
         shell: bash
         
       - name: Run Benchmark Tests
-        uses: hershd23/meshery-smp-action@self-hosted-runner
+        uses: layer5io/meshery-smp-action@self-hosted
         with:
           provider_token: ${{ secrets.MESHERY_TOKEN }}
           platform: docker
