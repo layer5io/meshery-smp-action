@@ -9,16 +9,16 @@ export MESH_NAME='Open Service Mesh'
 export SERVICE_MESH='OPEN_SERVICE_MESH'
 
 system=$(uname -s)
-release=v0.11.1
-curl -L https://github.com/openservicemesh/osm/releases/download/${release}/osm-${release}-${system}-amd64.tar.gz | tar -vxzf - ./${system}-amd64/osm version
-osm install \
+release=v1.0.0
+curl -L https://github.com/openservicemesh/osm/releases/download/${release}/osm-${release}-${system,,}-amd64.tar.gz | tar -vxzf - 
+./${system,,}-amd64/osm install \
     --set=OpenServiceMesh.enablePermissiveTrafficPolicy=true \
     --set=OpenServiceMesh.deployPrometheus=true \
     --set=OpenServiceMesh.deployGrafana=true \
     --set=OpenServiceMesh.deployJaeger=true
 
 kubectl create namespace bookstore
-osm namespace add bookstore
+./${system,,}-amd64/osm namespace add bookstore
 kubectl apply -f https://raw.githubusercontent.com/openservicemesh/osm/release-v0.11/docs/example/manifests/apps/bookstore.yaml
 
 sleep 100
@@ -30,15 +30,15 @@ kubectl get pods -n bookstore
 sleep 100
 
 # Expose the application outside the cluster
-backend="$1"
-thisScript="$(dirname "$0")/$(basename "$0")"
+# backend="$1"
+# thisScript="$(dirname "$0")/$(basename "$0")"
 
-if [ -z "$backend" ]; then
-    echo "Usage: $thisScript <backend-name>"
-    exit 1
-fi
-
-POD="$(kubectl get pods --selector app="$backend" -n "$BOOKSTORE_NAMESPACE" --no-headers | grep 'Running' | awk 'NR==1{print $1}')"
+# if [ -z "$backend" ]; then
+#     echo "Usage: $thisScript <backend-name>"
+#     exit 1
+# fi
+# hardcode bookstore comment out uneceserry code
+POD="$(kubectl get pods --selector app="bookstore" -n "$BOOKSTORE_NAMESPACE" --no-headers | grep 'Running' | awk 'NR==1{print $1}')"
 kubectl port-forward "$POD" -n "$BOOKSTORE_NAMESPACE" 15000:15000 &> /dev/null &
 
 echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
