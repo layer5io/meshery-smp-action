@@ -35,7 +35,7 @@ main() {
 	kubectl config view --minify --flatten > ~/minified_config
 	mv ~/minified_config ~/.kube/config
 
-  curl -L https://git.io/meshery | PLATFORM=$PLATFORM bash -
+  	curl -L https://git.io/meshery | sudo PLATFORM=$PLATFORM bash - &
 
 	sleep 60
 }
