@@ -31,7 +31,7 @@ on:
 jobs:
   manual-test:
     name: Configurable Benchmark Test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Setup Kubernetes
@@ -55,7 +55,7 @@ jobs:
         uses: layer5io/meshery-smp-action@self-hosted
         with:
           provider_token: ${{ secrets.MESHERY_TOKEN }}
-          platform: docker
+          platform: kubernetes
           profile_name: ${{ github.event.inputs.profile_name }}
           profile_filename: ${{ github.event.inputs.profile_filename }}
           endpoint_url: ${{env.ENDPOINT_URL}}
