@@ -1,0 +1,133 @@
+name: Configurable Benchmark Test on Self-hosted Runner
+on: 
+  workflow_dispatch:
+    inputs:
+      profile_name:
+        description: "performance profile to use"
+        required: false
+      profile_filename:
+        description: "test configuration file"
+        required: false
+      service_mesh:
+        type: choice
+        required: false
+        description: "service mesh being tested"
+        options:
+          - istio
+          - linkerd
+      load_generator:
+        type: choice
+        required: false
+        description: "load generator to run tests with"
+        options:
+          - fortio
+          - wrk2
+          - nighthawk
+          
+jobs:
+  start-runner:
+    name: Start self-hosted CNCF CIL runner
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    outputs:
+      hostname: ${{ steps.start-cil-runner.outputs.hostname }}
+      label: ${{ steps.start-cil-runner.outputs.label }}
+      device_id: ${{ steps.start-cil-runner.outputs.device_id }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Configure CNCF CIL credentials
+        run: |
+          chmod +x .github/workflows/scripts/self-hosted-credentails.sh 
+          .github/workflows/scripts/self-hosted-credentails.sh ${{ secrets.CNCF_CIL_TOKEN }}
+        shell: bash
+
+      - name: Create registration token for CNCF CIL runner
+        id: getRegToken
+        run: |
+          reg_token=$(curl -s -X POST -H "Accept: application/vnd.github.v3+json" \
+          -H 'Authorization: token ${{ secrets.PAT }}' \
+          https://api.github.com/repos/${{github.repository}}/actions/runners/registration-token | jq -r .token)
+          echo REG_TOKEN=$reg_token >> $GITHUB_ENV
+          echo REPOSITORY=${{github.repository}} >> $GITHUB_ENV
+        shell: bash
+
+      - name: Start CNCF CIL runner
+        id: start-cil-runner
+        run: |
+          chmod +x .github/workflows/scripts/start-cil-runner.sh
+          .github/workflows/scripts/start-cil-runner.sh ${{ secrets.cncf_cil_token }} ${{ github.event.inputs.service_mesh }}-${{ github.event.inputs.load_generator }}
+        shell: bash
+
+  run-benchmarks:
+    name: Run the configurable benchmarks on the runner
+    needs: 
+       - start-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
+    steps:
+      - name: Install dependencies
+        run: |
+          echo "Current user: $(whoami)"
+          echo "Installing kubectl..."
+          curl -LO https://dl.k8s.io/release/v1.23.2/bin/linux/amd64/kubectl 
+          sudo install -o smp -g smp -m 0755 kubectl /usr/local/bin/kubectl
+          echo "Installing docker..."
+          sudo apt update -y
+          sudo apt install -y jq unzip apt-transport-https ca-certificates software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+          sudo apt-cache policy docker-ce
+          sudo apt install -y docker-ce
+          sudo systemctl status docker
+
+      - name: Setup Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.3
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.23.2'
+          driver: docker
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Service Mesh and Deploy Application
+        run: |
+          chmod +x .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
+          .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
+        shell: bash
+
+      - name: Run Benchmark Tests
+        uses: layer5io/meshery-smp-action@self-hosted
+        with:
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
+          platform: docker
+          profile_name: ${{ github.event.inputs.profile_name }}
+          profile_filename: ${{ github.event.inputs.profile_filename }}
+          endpoint_url: ${{env.ENDPOINT_URL}}
+          service_mesh: ${{env.SERVICE_MESH}}
+          load_generator: ${{ github.event.inputs.load_generator }}
+          test_name: '${{ github.event.inputs.service_mesh }}-${{ github.event.inputs.load_generator }}-${{ github.event.inputs.profile_filename }}${{ github.event.inputs.profile_name }}'
+
+  stop-runner:
+    name: Stop self-hosted runner
+    needs:
+      - start-runner # required to get output from the start-runner job
+      - run-benchmarks # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Stop CNCF CIL runner
+        run: |
+          chmod +x .github/workflows/scripts/stop-cil-runner.sh
+          .github/workflows/scripts/stop-cil-runner.sh ${{ secrets.cncf_cil_token }} ${{ needs.start-runner.outputs.device_id }} ${{ needs.start-runner.outputs.hostname }}
+        shell: bash
+
+      - name: Remove CNCF CIL runner from github repository
+        run: |
+          runner_id=$(curl -s -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners | jq '.runners[] | select(.name == "${{ needs.start-runner.outputs.hostname }}") | {id}' | jq .id)
+          curl -X DELETE -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners/$runner_id
+        shell: bash
