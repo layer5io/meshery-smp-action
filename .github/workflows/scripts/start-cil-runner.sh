@@ -5,8 +5,9 @@
 token=$1
 hostname=$2
 
-# Generate random number from datastamp as the hostname of runner
-label=$(date +%N)
+# Use github.run_id as the lable of runner for scheduled benchmark test
+# github.run_id is a unique number for each workflow run within a repository. 
+label=$GITHUB_RUN_ID
 
 hostname="$hostname-$label"
 echo "Creating CNCF CIL machine: $hostname..."
