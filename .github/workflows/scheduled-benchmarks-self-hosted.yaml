@@ -1,0 +1,277 @@
+# This workflow runs performance benchmarks with Meshery based on the configuration provided
+# This workflow is scheduled to run daily but can also be triggered manually
+
+name: Scheduled Benchmark Tests on Self-hosted Runner
+on:
+  # for triggering manually, provide a test configuration file name or a performance profile name
+  workflow_dispatch:
+    inputs:
+      profile_name:
+        description: "performance profile to use"
+        required: false
+      profile_filename:
+        description: "test configuration file"
+        required: false
+  # scheduled to run at everyday at 13:00
+  schedule:
+    - cron: '0 13 * * *'
+
+jobs:
+  # Manual Benchmark Test
+  start-runners-manual:
+    name: Start self-hosted CNCF CIL runners for manual test
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service-mesh: ['istio', 'linkerd']
+        load-generator: ['fortio', 'wrk2']
+    outputs:
+      github_run_id: ${{ env.GITHUB_RUN_ID }} # use this github_run_id as a suffix for CIL machines and runners
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Configure CNCF CIL credentials
+        run: |
+          chmod +x .github/workflows/scripts/self-hosted-credentails.sh 
+          .github/workflows/scripts/self-hosted-credentails.sh ${{ secrets.CNCF_CIL_TOKEN }}
+        shell: bash
+
+      - name: Create registration token for CNCF CIL runner
+        id: getRegToken
+        run: |
+          reg_token=$(curl -s -X POST -H "Accept: application/vnd.github.v3+json" \
+          -H 'Authorization: token ${{ secrets.PAT }}' \
+          https://api.github.com/repos/${{github.repository}}/actions/runners/registration-token | jq -r .token)
+          echo REG_TOKEN=$reg_token >> $GITHUB_ENV
+          echo REPOSITORY=${{github.repository}} >> $GITHUB_ENV
+        shell: bash
+
+      # The hostname will be like istio-fortio-1997512481
+      - name: Start CNCF CIL runner
+        id: start-cil-runner
+        run: |
+          echo GITHUB_RUN_ID=${{ github.run_id }} >> $GITHUB_ENV
+          chmod +x .github/workflows/scripts/start-cil-runner.sh
+          .github/workflows/scripts/start-cil-runner.sh ${{ secrets.cncf_cil_token }} ${{ matrix.service-mesh }}-${{ matrix.load-generator }}
+        shell: bash
+
+  manual-test:
+    name: Manual Benchmark Test
+    needs:
+      - start-runners-manual
+    runs-on: ${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ github.run_id }}
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service-mesh: ['istio', 'linkerd']
+        load-generator: ['fortio', 'wrk2']
+    steps:
+      - name: Install dependencies
+        run: |
+          echo "Current user: $(whoami)"
+          echo "Installing kubectl..."
+          curl -LO https://dl.k8s.io/release/v1.23.2/bin/linux/amd64/kubectl 
+          sudo install -o smp -g smp -m 0755 kubectl /usr/local/bin/kubectl
+          echo "Installing docker..."
+          sudo apt update -y
+          sudo apt install -y jq unzip apt-transport-https ca-certificates software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+          sudo apt-cache policy docker-ce
+          sudo apt install -y docker-ce
+          sudo systemctl status docker
+
+      - name: Setup Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.3
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.23.2'
+          driver: docker
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Service Mesh and Deploy Application
+        run: |
+          chmod +x .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+          .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+        shell: bash
+
+      - name: Get Date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H.%M.%S')"
+        
+      - name: Run Benchmark Tests
+        uses: layer5io/meshery-smp-action@self-hosted
+        with:
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
+          platform: docker
+          profile_name: ${{ github.event.inputs.profile_name }}
+          profile_filename: ${{ github.event.inputs.profile_filename }}
+          endpoint_url: ${{env.ENDPOINT_URL}}
+          service_mesh: ${{env.SERVICE_MESH}}
+          load_generator: ${{ matrix.load-generator }}
+          test_name: '${{ steps.date.outputs.date }}'
+
+  stop-runner-manual:
+    name: Stop self-hosted runner
+    needs:
+      - start-runners-manual # required to get output from the start-runner job
+      - manual-test # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service-mesh: ['istio', 'linkerd']
+        load-generator: ['fortio', 'wrk2']
+    if: ${{ always() && github.event_name == 'workflow_dispatch' }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Stop CNCF CIL runner
+        run: |
+          chmod +x .github/workflows/scripts/stop-cil-runner.sh
+          .github/workflows/scripts/stop-cil-runner.sh ${{ secrets.cncf_cil_token }} ${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ needs.start-runners-manual.outputs.github_run_id }}
+        shell: bash
+
+      - name: Remove CNCF CIL runner from github repository
+        run: |
+          runner_id=$(curl -s -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners | jq '.runners[] | select(.name == "${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ needs.start-runners-manual.outputs.github_run_id }}") | {id}' | jq -r .id)
+          curl -X DELETE -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners/$runner_id
+        shell: bash
+
+  # Scheduled Benchmark Test
+  start-runners-scheduled:
+    name: Start self-hosted CNCF CIL runners for scheduled test
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service-mesh: ['istio', 'linkerd', 'osm']
+        load-generator: ['fortio', 'wrk2']
+        test-configuration: ['load-test','soak-test']
+    outputs:
+      github_run_id: ${{ env.GITHUB_RUN_ID }} # use this github_run_id as a suffix for CIL machines and runners
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Configure CNCF CIL credentials
+        run: |
+          chmod +x .github/workflows/scripts/self-hosted-credentails.sh 
+          .github/workflows/scripts/self-hosted-credentails.sh ${{ secrets.CNCF_CIL_TOKEN }}
+        shell: bash
+
+      - name: Create registration token for CNCF CIL runner
+        id: getRegToken
+        run: |
+          reg_token=$(curl -s -X POST -H "Accept: application/vnd.github.v3+json" \
+          -H 'Authorization: token ${{ secrets.PAT }}' \
+          https://api.github.com/repos/${{github.repository}}/actions/runners/registration-token | jq -r .token)
+          echo REG_TOKEN=$reg_token >> $GITHUB_ENV
+          echo REPOSITORY=${{github.repository}} >> $GITHUB_ENV
+        shell: bash
+
+      # The hostname will be like istio-fortio-load-test-1997512481
+      - name: Start CNCF CIL runner
+        id: start-cil-runner
+        run: |
+          echo GITHUB_RUN_ID=${{ github.run_id }} >> $GITHUB_ENV
+          chmod +x .github/workflows/scripts/start-cil-runner.sh
+          .github/workflows/scripts/start-cil-runner.sh ${{ secrets.cncf_cil_token }} ${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ matrix.test-configuration }}
+        shell: bash
+
+  scheduled-test:
+    name: Scheduled Benchmark Test
+    needs:
+      - start-runners-scheduled
+    runs-on: ${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ matrix.test-configuration }}-${{ github.run_id }}
+    if: ${{ github.event_name == 'schedule' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service-mesh: ['istio', 'linkerd', 'osm']
+        load-generator: ['fortio', 'wrk2']
+        test-configuration: ['load-test','soak-test']
+    steps:
+      - name: Install dependencies
+        run: |
+          echo "Current user: $(whoami)"
+          echo "Installing kubectl..."
+          curl -LO https://dl.k8s.io/release/v1.23.2/bin/linux/amd64/kubectl 
+          sudo install -o smp -g smp -m 0755 kubectl /usr/local/bin/kubectl
+          echo "Installing docker..."
+          sudo apt update -y
+          sudo apt install -y jq unzip apt-transport-https ca-certificates software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+          sudo apt-cache policy docker-ce
+          sudo apt install -y docker-ce
+          sudo systemctl status docker
+
+      - name: Setup Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.3
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.23.2'
+          driver: docker
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Service Mesh and Deploy Application
+        run: |
+          chmod +x .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+          .github/workflows/scripts/${{ matrix.service-mesh }}_deploy.sh
+        shell: bash
+
+      - name: Get Date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H.%M.%S')"
+        
+      - name: Run Benchmark Tests
+        uses: layer5io/meshery-smp-action@self-hosted
+        with:
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
+          platform: docker
+          profile_filename: ${{ matrix.test-configuration }}.yaml
+          endpoint_url: ${{env.ENDPOINT_URL}}
+          service_mesh: ${{env.SERVICE_MESH}}
+          load_generator: ${{ matrix.load-generator }}
+          profile_name: '${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ matrix.test-configuration }}'
+          test_name: '${{ steps.date.outputs.date }}'
+
+  stop-runner-scheduled:
+    name: Stop self-hosted runner
+    needs:
+      - start-runners-scheduled # required to get output from the start-runner job
+      - scheduled-test # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service-mesh: ['istio', 'linkerd', 'osm']
+        load-generator: ['fortio', 'wrk2']
+        test-configuration: ['load-test','soak-test']
+    if: ${{ always() && github.event_name == 'schedule' }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Stop CNCF CIL runner
+        run: |
+          chmod +x .github/workflows/scripts/stop-cil-runner.sh
+          .github/workflows/scripts/stop-cil-runner.sh ${{ secrets.cncf_cil_token }} ${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ matrix.test-configuration }}-${{ needs.start-runners-scheduled.outputs.github_run_id }}
+        shell: bash
+
+      - name: Remove CNCF CIL runner from github repository
+        run: |
+          runner_id=$(curl -s -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners | jq '.runners[] | select(.name == "${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ matrix.test-configuration }}-${{ needs.start-runners-scheduled.outputs.github_run_id }}") | {id}' | jq -r .id)
+          curl -X DELETE -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners/$runner_id
+        shell: bash

@@ -123,11 +123,11 @@ jobs:
       - name: Stop CNCF CIL runner
         run: |
           chmod +x .github/workflows/scripts/stop-cil-runner.sh
-          .github/workflows/scripts/stop-cil-runner.sh ${{ secrets.cncf_cil_token }} ${{ needs.start-runner.outputs.device_id }} ${{ needs.start-runner.outputs.hostname }}
+          .github/workflows/scripts/stop-cil-runner.sh ${{ secrets.cncf_cil_token }} ${{ needs.start-runner.outputs.hostname }} ${{ needs.start-runner.outputs.device_id }}
         shell: bash
 
       - name: Remove CNCF CIL runner from github repository
         run: |
-          runner_id=$(curl -s -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners | jq '.runners[] | select(.name == "${{ needs.start-runner.outputs.hostname }}") | {id}' | jq .id)
+          runner_id=$(curl -s -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners | jq '.runners[] | select(.name == "${{ needs.start-runner.outputs.hostname }}") | {id}' | jq -r .id)
           curl -X DELETE -H 'Authorization: token ${{ secrets.PAT }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners/$runner_id
         shell: bash
