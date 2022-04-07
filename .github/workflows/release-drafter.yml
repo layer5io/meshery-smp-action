@@ -2,7 +2,6 @@ name: Release Drafter
 
 on:
   push:
-    # our release branch
     branches:
       - master
 
