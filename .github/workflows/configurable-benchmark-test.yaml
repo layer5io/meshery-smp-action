@@ -52,10 +52,10 @@ jobs:
         shell: bash
         
       - name: Run Benchmark Tests
-        uses: layer5io/meshery-smp-action@self-hosted
+        uses: layer5io/meshery-smp-action@master
         with:
           provider_token: ${{ secrets.MESHERY_TOKEN }}
-          platform: kubernetes
+          platform: docker
           profile_name: ${{ github.event.inputs.profile_name }}
           profile_filename: ${{ github.event.inputs.profile_filename }}
           endpoint_url: ${{env.ENDPOINT_URL}}
