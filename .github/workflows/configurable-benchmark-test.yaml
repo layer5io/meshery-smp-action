@@ -35,11 +35,12 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Setup Kubernetes
-        uses: manusa/actions-setup-minikube@v2.4.1
+        uses: manusa/actions-setup-minikube@v2.4.3
         with:
           minikube version: 'v1.23.2'
-          kubernetes version: 'v1.22.2'
+          kubernetes version: 'v1.23.2'
           driver: docker
+          start args: "--v=5"
 
       - name: Checkout Code
         uses: actions/checkout@v2
