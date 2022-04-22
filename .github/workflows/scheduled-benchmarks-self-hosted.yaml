@@ -236,7 +236,7 @@ jobs:
         run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H.%M.%S')"
         
       - name: Run Benchmark Tests
-        uses: layer5io/meshery-smp-action@self-hosted
+        uses: layer5io/meshery-smp-action@master
         with:
           provider_token: ${{ secrets.MESHERY_TOKEN }}
           platform: docker
