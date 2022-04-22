@@ -140,6 +140,7 @@ jobs:
         shell: bash
 
       - name: Remove CNCF CIL runner from github repository
+        if: always()
         run: |
           runner_id=$(curl -s -H 'Authorization: token ${{ secrets.GH_ACCESS_TOKEN }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners | jq '.runners[] | select(.name == "${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ needs.start-runners-manual.outputs.github_run_id }}") | {id}' | jq -r .id)
           curl -X DELETE -H 'Authorization: token ${{ secrets.GH_ACCESS_TOKEN }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners/$runner_id
@@ -271,6 +272,7 @@ jobs:
         shell: bash
 
       - name: Remove CNCF CIL runner from github repository
+        if: always()
         run: |
           runner_id=$(curl -s -H 'Authorization: token ${{ secrets.GH_ACCESS_TOKEN }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners | jq '.runners[] | select(.name == "${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ matrix.test-configuration }}-${{ needs.start-runners-scheduled.outputs.github_run_id }}") | {id}' | jq -r .id)
           curl -X DELETE -H 'Authorization: token ${{ secrets.GH_ACCESS_TOKEN }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners/$runner_id
