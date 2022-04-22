@@ -8,14 +8,19 @@
 export MESH_NAME='Istio'
 export SERVICE_MESH='ISTIO'
 
+# Check if mesheryctl is present, else install it
+if ! [ -x "$(command -v mesheryctl)" ]; then
+    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby...' >&2
+    curl -L https://git.io/meshery | PLATFORM=kubernetes bash -
+fi
+
 curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.11.4 sh -
 cd istio-1.11.4
 export PATH=$PWD/bin:$PATH
 istioctl install --set profile=demo -y
 kubectl label namespace default istio-injection=enabled
 
-kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
-kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
+mesheryctl app onboard -f "samples/bookinfo/platform/kube/bookinfo.yaml"
 
 # Wait for the application to be ready
 sleep 100

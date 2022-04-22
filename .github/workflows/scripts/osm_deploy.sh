@@ -17,9 +17,13 @@ curl -L https://github.com/openservicemesh/osm/releases/download/${release}/osm-
     --set=OpenServiceMesh.deployGrafana=true \
     --set=OpenServiceMesh.deployJaeger=true
 
-kubectl create namespace bookstore
-./${system,,}-amd64/osm namespace add bookstore
-kubectl apply -f https://raw.githubusercontent.com/openservicemesh/osm/release-v0.11/docs/example/manifests/apps/bookstore.yaml
+# Check if mesheryctl is present, else install it
+if ! [ -x "$(command -v mesheryctl)" ]; then
+    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby...' >&2
+    curl -L https://git.io/meshery | PLATFORM=kubernetes bash -
+fi
+
+mesheryctl app onboard -f "samples/bookinfo/platform/kube/bookinfo.yaml"
 
 sleep 100
 

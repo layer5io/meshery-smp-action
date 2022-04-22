@@ -15,9 +15,14 @@ linkerd check --pre
 linkerd install | kubectl apply -f -
 linkerd check
 
-curl -fsL https://run.linkerd.io/emojivoto.yml | kubectl apply -f -
-kubectl -n emojivoto port-forward svc/web-svc 8080:80 &> /dev/null &
-kubectl get -n emojivoto deploy -o yaml | linkerd inject - | kubectl apply -f -
+# Check if mesheryctl is present, else install it
+if ! [ -x "$(command -v mesheryctl)" ]; then
+    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby...' >&2
+    curl -L https://git.io/meshery | PLATFORM=kubernetes bash -
+fi
+
+curl -fsL https://run.linkerd.io/emojivoto.yml 
+mesheryctl app onboard -f "./emojivoto.yml"
 
 # Wait for the application to be ready
 sleep 100
