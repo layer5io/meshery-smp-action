@@ -20,6 +20,7 @@ jobs:
   # Manual Benchmark Test
   start-runners-manual:
     name: Start self-hosted CNCF CIL runners for manual test
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' }}
     strategy:
@@ -60,6 +61,7 @@ jobs:
 
   manual-test:
     name: Manual Benchmark Test
+    timeout-minutes: 60
     needs:
       - start-runners-manual
     runs-on: ${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ github.run_id }}
@@ -119,6 +121,7 @@ jobs:
 
   stop-runner-manual:
     name: Stop self-hosted runner
+    timeout-minutes: 60
     needs:
       - start-runners-manual # required to get output from the start-runner job
       - manual-test # required to wait when the main job is done
@@ -149,6 +152,7 @@ jobs:
   # Scheduled Benchmark Test
   start-runners-scheduled:
     name: Start self-hosted CNCF CIL runners for scheduled test
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'schedule' }}
     strategy:
@@ -190,6 +194,7 @@ jobs:
 
   scheduled-test:
     name: Scheduled Benchmark Test
+    timeout-minutes: 60
     needs:
       - start-runners-scheduled
     runs-on: ${{ matrix.service-mesh }}-${{ matrix.load-generator }}-${{ matrix.test-configuration }}-${{ github.run_id }}
@@ -250,6 +255,7 @@ jobs:
 
   stop-runner-scheduled:
     name: Stop self-hosted runner
+    timeout-minutes: 60
     needs:
       - start-runners-scheduled # required to get output from the start-runner job
       - scheduled-test # required to wait when the main job is done

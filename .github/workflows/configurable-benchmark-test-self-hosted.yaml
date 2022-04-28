@@ -27,6 +27,7 @@ on:
 jobs:
   start-runner:
     name: Start self-hosted CNCF CIL runner
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' }}
     outputs:
@@ -62,6 +63,7 @@ jobs:
 
   run-benchmarks:
     name: Run the configurable benchmarks on the runner
+    timeout-minutes: 60
     needs: 
        - start-runner # required to start the main job when the runner is ready
     runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
@@ -111,6 +113,7 @@ jobs:
 
   stop-runner:
     name: Stop self-hosted runner
+    timeout-minutes: 60
     needs:
       - start-runner # required to get output from the start-runner job
       - run-benchmarks # required to wait when the main job is done
