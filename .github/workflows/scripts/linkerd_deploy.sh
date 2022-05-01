@@ -15,8 +15,9 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
 fi
 
 curl -fsL https://run.linkerd.io/emojivoto.yml 
+mesheryctl system start
 mesheryctl system login --provider None
-mesheryctl mesh deploy --adapter meshery-linkerd:10000
+mesheryctl mesh deploy --adapter meshery-linkerd:10001
 mesheryctl app onboard -f "./emojivoto.yml"
 
 # Wait for the application to be ready
