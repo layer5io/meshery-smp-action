@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-
 # This script is used to deploy Istio on Kubernetes
 #
 # Also deploys the bookinfo application on Istio and passes the gateway URL to Meshery
-
 # See: https://github.com/service-mesh-performance/service-mesh-performance/blob/master/protos/service_mesh.proto
+
 export MESH_NAME='Istio'
 export SERVICE_MESH='ISTIO'
 
@@ -14,10 +13,12 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
     curl -L https://meshery.io/install | PLATFORM=kubernetes bash -
 fi
 
+echo "Starting Meshery... This might take a while"
 mesheryctl system start
-mesheryctl system login --provider None
-mesheryctl mesh deploy --adapter meshery-istio:10000
-mesheryctl app onboard -f "https://github.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml"
+sleep 60
+#printf "\U2193" | mesheryctl system login 
+mesheryctl mesh deploy adapter meshery-istio:10000
+mesheryctl pattern apply -f "https://github.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml"
 
 # Wait for the application to be ready
 sleep 100
@@ -33,6 +34,5 @@ minikube tunnel &> /dev/null &
 
 echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
 echo "Gateway URL: $GATEWAY_URL"
-
 echo "ENDPOINT_URL=$GATEWAY_URL/productpage" >> $GITHUB_ENV
 echo "SERVICE_MESH=$SERVICE_MESH" >> $GITHUB_ENV

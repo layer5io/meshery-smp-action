@@ -14,10 +14,12 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
     curl -L https://meshery.io/install  | PLATFORM=kubernetes bash -
 fi
 
+echo "Starting Meshery... This might take a while"
 mesheryctl system start
-mesheryctl system login --provider None
-mesheryctl mesh deploy --adapter meshery-osm:10009
-mesheryctl app onboard -f "https://github.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml"
+sleep 60
+#mesheryctl system login --provider None
+mesheryctl mesh deploy adapter meshery-osm:10009
+mesheryctl pattern apply -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/release-v1.0/manifests/apps/bookstore.yaml"
 
 sleep 100
 
