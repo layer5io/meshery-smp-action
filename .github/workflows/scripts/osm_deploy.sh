@@ -10,16 +10,15 @@ export SERVICE_MESH='OPEN_SERVICE_MESH'
 
 # Check if mesheryctl is present, else install it
 if ! [ -x "$(command -v mesheryctl)" ]; then
-    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby...' >&2
+    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
     curl -L https://meshery.io/install  | PLATFORM=kubernetes bash -
 fi
 
-echo "Starting Meshery... This might take a while"
-mesheryctl system start
-sleep 60
-#mesheryctl system login --provider None
+sleep 10
+mesheryctl system login --provider None
 mesheryctl mesh deploy adapter meshery-osm:10009
-mesheryctl pattern apply -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/release-v1.0/manifests/apps/bookstore.yaml"
+echo "Onboarding application... Standby for few minutes..."
+mesheryctl app onboard -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/release-v1.0/manifests/apps/bookstore.yaml"
 
 sleep 100
 

@@ -9,16 +9,15 @@ export SERVICE_MESH='ISTIO'
 
 # Check if mesheryctl is present, else install it
 if ! [ -x "$(command -v mesheryctl)" ]; then
-    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby...' >&2
+    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
     curl -L https://meshery.io/install | PLATFORM=kubernetes bash -
 fi
 
-echo "Starting Meshery... This might take a while"
-mesheryctl system start
-sleep 60
-#printf "\U2193" | mesheryctl system login 
+sleep 10
+mesheryctl system login --provider None
 mesheryctl mesh deploy adapter meshery-istio:10000
-mesheryctl pattern apply -f "https://github.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml"
+echo "Onboarding application... Standby for few minutes..."
+mesheryctl app onboard -f "https://raw.githubusercontent.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml"
 
 # Wait for the application to be ready
 sleep 100

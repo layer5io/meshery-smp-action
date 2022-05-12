@@ -10,17 +10,16 @@ export SERVICE_MESH='LINKERD'
 
 # Check if mesheryctl is present, else install it
 if ! [ -x "$(command -v mesheryctl)" ]; then
-    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby...' >&2
+    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
     curl -L https://meshery.io/install | PLATFORM=kubernetes bash -
 fi
 
 curl -fsL https://run.linkerd.io/emojivoto.yml 
-echo "Starting Meshery... This might take a while"
-mesheryctl system start
-sleep 60
-#mesheryctl system login
+sleep 10
+mesheryctl system login --provider None
 mesheryctl mesh deploy adapter meshery-linkerd:10001
-mesheryctl pattern apply -f "./emojivoto.yml"
+echo "Onboarding application... Standby for few minutes..."
+mesheryctl app onboard -f "./emojivoto.yml"
 
 # Wait for the application to be ready
 sleep 100
