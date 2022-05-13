@@ -15,7 +15,8 @@ fi
 
 sleep 10
 
-# TODO: Deploy demo apps
+# TODO: Didn't find a demo apps on Consule, so use bookinfo app.
+mesheryctl app onboard -f "https://raw.githubusercontent.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml"
 
 echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
 echo "Endpoint URL: http://localhost:5000"
