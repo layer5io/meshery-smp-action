@@ -20,6 +20,10 @@ on:
           - istio
           - linkerd
           - osm
+          - kuma
+          - appmesh
+          - cilium
+          - consul
       load_generator:
         type: choice
         required: false
