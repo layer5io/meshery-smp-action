@@ -10,7 +10,7 @@ export SERVICE_MESH='ISTIO'
 # Check if mesheryctl is present, else install it
 if ! [ -x "$(command -v mesheryctl)" ]; then
     echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
-    curl -L https://meshery.io/install | PLATFORM=kubernetes bash -
+    curl -L https://meshery.io/install | ADAPTERS=istio PLATFORM=kubernetes bash -
 fi
 
 sleep 10
