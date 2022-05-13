@@ -86,6 +86,8 @@ jobs:
           sudo apt-cache policy docker-ce
           sudo apt install -y docker-ce
           sudo systemctl status docker
+          sudo mkdir -p ~/.kube
+          sudo chmod 777 ~/.kube
 
       - name: Setup Kubernetes
         uses: manusa/actions-setup-minikube@v2.4.3
@@ -220,6 +222,8 @@ jobs:
           sudo apt-cache policy docker-ce
           sudo apt install -y docker-ce
           sudo systemctl status docker
+          sudo mkdir -p ~/.kube
+          sudo chmod 777 ~/.kube
 
       - name: Setup Kubernetes
         uses: manusa/actions-setup-minikube@v2.4.3
