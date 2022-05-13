@@ -12,9 +12,9 @@ on:
       profile_filename:
         description: "test configuration file"
         required: false
-  # scheduled to run at everyday at 13:00
+  # scheduled to run on everyhour
   schedule:
-    - cron: '0 13 * * *'
+    - cron: '0 * * * *'
 
 jobs:
   # Manual Benchmark Test
