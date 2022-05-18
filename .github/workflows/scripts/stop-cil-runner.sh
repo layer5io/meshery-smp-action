@@ -9,7 +9,7 @@ device_id=$3
 if [[ -z $device_id ]]; then
     # If it's a scheduled benchmark test, we cannot get the orrespondence between hostname and
     # device_id from previous job, so we need to use hostname to retrive device_id
-    device_id=$(curl -H "X-Auth-Token: $token " https://api.equinix.com/metal/v1/projects/96a9d336-541b-42f7-9827-d845010da550/devices | jq '.devices[] | select(.hostname == '\"$hostname\"') | {id}' | jq -r .id)
+    device_id=$(curl -H "X-Auth-Token: $token " https://api.equinix.com/metal/v1/projects/96a9d336-541b-42f7-9827-d845010da550/devices?hostname=${hostname} | jq '.devices[] | {id}' | jq -r .id)
 fi
 
 echo "Removing CNCF CIL machine: $hostname, device id: $device_id..."
