@@ -11,7 +11,7 @@ export SERVICE_MESH='LINKERD'
 # Check if mesheryctl is present, else install it
 if ! [ -x "$(command -v mesheryctl)" ]; then
     echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
-    curl -L https://meshery.io/install | PLATFORM=kubernetes bash -
+    curl -L https://meshery.io/install | ADAPTERS=linkerd PLATFORM=kubernetes bash -
 fi
 
 curl -fsL https://run.linkerd.io/emojivoto.yml 
