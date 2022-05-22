@@ -14,10 +14,10 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
 fi
 
 sleep 10
-mesheryctl system login --provider None
-mesheryctl mesh deploy adapter meshery-istio:10000
+#mesheryctl system login --provider None
+mesheryctl mesh deploy adapter meshery-istio:10000 --token "./github/workflows/scripts/auth.json"
 echo "Onboarding application... Standby for few minutes..."
-mesheryctl app onboard -f "https://raw.githubusercontent.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml"
+mesheryctl app onboard -f "https://raw.githubusercontent.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml" --token "./github/workflows/scripts/auth.json"
 
 # Wait for the application to be ready
 sleep 100
