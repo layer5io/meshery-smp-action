@@ -45,9 +45,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Setup Tmate session
-        uses: mxschmitt/action-tmate@v3
-        
       - name: Install Service Mesh and Deploy Application
         run: |
           chmod +x .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
