@@ -37,7 +37,7 @@ jobs:
       - name: Setup Kubernetes
         uses: medyagh/setup-minikube@v0.0.7
         with:
-          minikube version: v1.23.2
+          minikube version: v1.23.2 
           kubernetes version: v1.23.2
           driver: docker
           apus: 4
