@@ -18,7 +18,7 @@ sleep 10
 echo 'E' | mesheryctl mesh deploy adapter meshery-istio:10000 --token "./.github/workflows/auth.json"
 sleep 50
 echo "Onboarding application... Standby for few minutes..."
-mesheryctl pattern apply -f "https://github.com/alphaX86/service-mesh-patterns/blob/master/samples/bookInfoPattern.yaml" --token "./.github/workflows/auth.json"
+mesheryctl pattern apply -f "https://github.com/service-mesh-patterns/service-mesh-patterns/blob/master/samples/bookInfoPattern.yaml" --token "./.github/workflows/auth.json"
 
 # Wait for the application to be ready
 sleep 50
