@@ -8,16 +8,18 @@
 export MESH_NAME='Linkerd'
 export SERVICE_MESH='LINKERD'
 
-curl -fsL https://run.linkerd.io/install | sh
-export PATH=$PATH:/home/runner/.linkerd2/bin
-linkerd version
-linkerd check --pre
-linkerd install | kubectl apply -f -
-linkerd check
+# Check if mesheryctl is present, else install it
+if ! [ -x "$(command -v mesheryctl)" ]; then
+    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
+    curl -L https://meshery.io/install | ADAPTERS=linkerd PLATFORM=kubernetes bash -
+fi
 
-curl -fsL https://run.linkerd.io/emojivoto.yml | kubectl apply -f -
-kubectl -n emojivoto port-forward svc/web-svc 8080:80 &> /dev/null &
-kubectl get -n emojivoto deploy -o yaml | linkerd inject - | kubectl apply -f -
+curl -fsL https://run.linkerd.io/emojivoto.yml --output emojivoto.yml
+sleep 10
+mesheryctl system login --provider None
+mesheryctl mesh deploy adapter meshery-linkerd:10001
+echo "Onboarding application... Standby for few minutes..."
+mesheryctl app onboard -f "./emojivoto.yml"
 
 # Wait for the application to be ready
 sleep 100
