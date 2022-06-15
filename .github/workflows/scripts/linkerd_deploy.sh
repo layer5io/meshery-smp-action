@@ -19,7 +19,8 @@ sleep 10
 mesheryctl system login --provider None
 mesheryctl mesh deploy adapter meshery-linkerd:10001
 echo "Onboarding application... Standby for few minutes..."
-mesheryctl app onboard -f "./emojivoto.yml"
+#mesheryctl app onboard -f "./emojivoto.yml"
+mesheryctl pattern apply -f "./emojivoto.yml" 
 
 # Wait for the application to be ready
 sleep 100

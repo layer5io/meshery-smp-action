@@ -15,6 +15,7 @@ on:
         options:
           - istio
           - linkerd
+          - osm
       load_generator:
         type: choice
         required: false
