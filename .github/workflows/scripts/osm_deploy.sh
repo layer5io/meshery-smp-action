@@ -14,12 +14,13 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
     curl -L https://meshery.io/install  | ADAPTERS=osm PLATFORM=kubernetes bash -
 fi
 
+curl -fsL https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml --output bookstore.yaml
 sleep 10
 mesheryctl system login --provider None
 mesheryctl mesh deploy adapter meshery-osm:10009
 echo "Onboarding application... Standby for few minutes..."
-#mesheryctl app onboard -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml"
-mesheryctl pattern apply -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml" --token "./.github/workflows/auth.json"
+mesheryctl app onboard -f "./bookstore.yaml"
+#mesheryctl pattern apply -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml" --token "./.github/workflows/auth.json"
 
 sleep 100
 
