@@ -18,7 +18,8 @@ sleep 10
 mesheryctl system login --provider None
 mesheryctl mesh deploy adapter meshery-osm:10009
 echo "Onboarding application... Standby for few minutes..."
-mesheryctl app onboard -f "https://github.com/openservicemesh/osm-docs/release-v1.0/manifests/apps/bookstore.yaml"
+#mesheryctl app onboard -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml"
+mesheryctl pattern apply -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml" --token "./.github/workflows/auth.json"
 
 sleep 100
 
