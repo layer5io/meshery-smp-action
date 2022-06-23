@@ -36,7 +36,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Setup Kubernetes
-        uses: medyagh/setup-minikube@v0.0.7
+        uses: manusa/actions-setup-minikube@v2.4.3
         with:
           minikube version: v1.23.2 
           kubernetes version: v1.23.2
