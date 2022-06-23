@@ -15,8 +15,10 @@ fi
 
 sleep 10
 
-# TODO: Didn't find a demo apps on Consule, so use bookinfo app.
-mesheryctl app onboard -f "https://raw.githubusercontent.com/istio/istio/blob/master/samples/bookinfo/platform/kube/bookinfo.yaml"
+echo 'E' | mesheryctl mesh deploy adapter meshery-consul:10000 --token "./.github/workflows/auth.json"
+sleep 50
+echo "Onboarding application... Standby for few minutes..."
+mesheryctl pattern apply -f "https://raw.githubusercontent.com/service-mesh-patterns/service-mesh-patterns/master/samples/bookInfoPattern.yaml" --token "./.github/workflows/auth.json"
 
 echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
 echo "Endpoint URL: http://localhost:5000"

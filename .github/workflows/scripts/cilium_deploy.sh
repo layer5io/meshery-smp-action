@@ -15,7 +15,11 @@ fi
 
 sleep 10
 
-# TODO: Deploy demo apps
+#mesheryctl system login --provider None
+echo 'E' | mesheryctl mesh deploy adapter meshery-cilium:10000 --token "./.github/workflows/auth.json"
+sleep 50
+echo "Onboarding application... Standby for few minutes..."
+mesheryctl pattern apply -f "https://raw.githubusercontent.com/service-mesh-patterns/service-mesh-patterns/master/samples/bookInfoPattern.yaml" --token "./.github/workflows/auth.json"
 
 echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
 echo "Endpoint URL: http://localhost:5000"
