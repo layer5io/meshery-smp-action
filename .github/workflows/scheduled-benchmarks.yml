@@ -24,8 +24,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service-mesh: ['istio', 'linkerd']
-        load-generator: ['fortio', 'wrk2']
+        service-mesh: ['istio', 'linkerd', 'consul', 'kuma', 'appmesh', 'cilium']
+        load-generator: ['fortio', 'wrk2', 'nighthawk']
     steps:
       - name: Setup Kubernetes
         uses: manusa/actions-setup-minikube@v2.4.3
