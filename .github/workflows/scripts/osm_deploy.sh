@@ -8,18 +8,19 @@
 export MESH_NAME='Open Service Mesh'
 export SERVICE_MESH='OPEN_SERVICE_MESH'
 
-system=$(uname -s)
-release=v1.0.0
-curl -L https://github.com/openservicemesh/osm/releases/download/${release}/osm-${release}-${system,,}-amd64.tar.gz | tar -vxzf - 
-./${system,,}-amd64/osm install \
-    --set=OpenServiceMesh.enablePermissiveTrafficPolicy=true \
-    --set=OpenServiceMesh.deployPrometheus=true \
-    --set=OpenServiceMesh.deployGrafana=true \
-    --set=OpenServiceMesh.deployJaeger=true
+# Check if mesheryctl is present, else install it
+if ! [ -x "$(command -v mesheryctl)" ]; then
+    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
+    curl -L https://meshery.io/install  | ADAPTERS=osm PLATFORM=kubernetes bash -
+fi
 
-kubectl create namespace bookstore
-./${system,,}-amd64/osm namespace add bookstore
-kubectl apply -f https://raw.githubusercontent.com/openservicemesh/osm/release-v0.11/docs/example/manifests/apps/bookstore.yaml
+curl -fsL https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml --output bookstore.yaml
+sleep 10
+mesheryctl system login --provider None
+mesheryctl mesh deploy adapter meshery-osm:10009
+echo "Onboarding application... Standby for few minutes..."
+mesheryctl app onboard -f "./bookstore.yaml"
+#mesheryctl pattern apply -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml" --token "./.github/workflows/auth.json"
 
 sleep 100
 

@@ -19,6 +19,7 @@ on:
         options:
           - istio
           - linkerd
+          - osm
       load_generator:
         type: choice
         required: false
@@ -37,10 +38,11 @@ jobs:
       - name: Setup Kubernetes
         uses: manusa/actions-setup-minikube@v2.4.3
         with:
-          minikube version: 'v1.23.2'
-          kubernetes version: 'v1.23.2'
+          minikube version: v1.23.2 
+          kubernetes version: v1.23.2
           driver: docker
-          start args: "--v=5"
+          apus: 4
+          memory: 5192
 
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -50,6 +52,9 @@ jobs:
           chmod +x .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
           .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
         shell: bash
+
+      - name: Initiate tmate session
+        uses: mxschmitt/action-tmate@v3
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
