@@ -47,4 +47,4 @@ echo "Endpoint URL: http://localhost:15000"
 
 # Pass the endpoint to be used by Meshery
 echo "ENDPOINT_URL=http://localhost:15000" >> $GITHUB_ENV
-echo "SERVICE_MESH=$SERVICE_MESH" >> $GITHUB_ENV``
+echo "SERVICE_MESH=$SERVICE_MESH" >> $GITHUB_ENV
