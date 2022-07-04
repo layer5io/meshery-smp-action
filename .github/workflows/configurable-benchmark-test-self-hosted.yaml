@@ -105,7 +105,7 @@ jobs:
         shell: bash
 
       - name: Run Benchmark Tests
-        uses: layer5io/meshery-smp-action@master
+        uses: gyohuangxin/meshery-smp-action@master
         with:
           provider_token: ${{ secrets.MESHERY_TOKEN }}
           platform: docker
