@@ -19,6 +19,7 @@ on:
         options:
           - istio
           - linkerd
+          - osm
           - kuma
           - appmesh
           - cilium

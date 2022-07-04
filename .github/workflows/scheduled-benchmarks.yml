@@ -66,8 +66,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service-mesh: ['istio', 'linkerd', 'osm']
-        load-generator: ['fortio', 'wrk2']
+        service-mesh: ['istio', 'linkerd', 'osm', 'consul', 'kuma', 'appmesh', 'cilium']
+        load-generator: ['fortio', 'wrk2', 'nighthawk']
         test-configuration: ['load-test.yaml','soak-test.yaml']
     steps:
       - name: Setup Kubernetes
