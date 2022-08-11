@@ -17,9 +17,9 @@ fi
 curl -fsL https://run.linkerd.io/emojivoto.yml --output emojivoto.yml
 sleep 10
 mesheryctl system login --provider None
-mesheryctl mesh deploy adapter meshery-linkerd:10001
+echo | mesheryctl mesh deploy adapter meshery-linkerd:10001 --token "~/auth.json"
 echo "Onboarding application... Standby for few minutes..."
-mesheryctl app onboard -f "./emojivoto.yml"
+mesheryctl app onboard -f "./emojivoto.yml" -t "~/auth.json"
 #mesheryctl pattern apply -f "./emojivoto.yml" 
 
 # Wait for the application to be ready
