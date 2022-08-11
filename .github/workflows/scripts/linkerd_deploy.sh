@@ -19,7 +19,7 @@ sleep 10
 #mesheryctl system login --provider None
 echo | mesheryctl mesh deploy adapter meshery-linkerd:10001 --token "./.github/workflows/auth.json"
 echo "Onboarding application... Standby for few minutes..."
-mesheryctl app onboard -f "./emojivoto.yml" -t "./.github/workflows/auth.json"
+mesheryctl app onboard -f "./emojivoto.yml" -s "Kubernetes Manifest" -t "./.github/workflows/auth.json"
 #mesheryctl pattern apply -f "./emojivoto.yml" 
 
 # Wait for the application to be ready
