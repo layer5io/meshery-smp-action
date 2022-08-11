@@ -14,7 +14,7 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
 fi
 
 sleep 10
-#mesheryctl system login --provider None
+mesheryctl system login --provider None
 echo | mesheryctl mesh deploy adapter meshery-istio:10000 --token "~/auth.json"
 sleep 100
 echo "Onboarding application... Standby for few minutes..."
