@@ -14,11 +14,11 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
 fi
 
 sleep 10
-mesheryctl system login --provider None
-echo | mesheryctl mesh deploy adapter meshery-istio:10000 --token "~/auth.json"
+#mesheryctl system login --provider None
+echo | mesheryctl mesh deploy adapter meshery-istio:10000 --namespace "istio-system" --token "./.github/workflows/auth.json"
 sleep 100
 echo "Onboarding application... Standby for few minutes..."
-mesheryctl pattern apply -f "https://raw.githubusercontent.com/service-mesh-patterns/service-mesh-patterns/master/samples/bookInfoPattern.yaml" --token "~/auth.json"
+mesheryctl pattern apply -f "https://raw.githubusercontent.com/service-mesh-patterns/service-mesh-patterns/master/samples/bookInfoPattern.yaml" --token "./.github/workflows/auth.json"
 
 # Wait for the application to be ready
 sleep 50
