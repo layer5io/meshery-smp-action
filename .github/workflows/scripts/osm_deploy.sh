@@ -16,10 +16,10 @@ fi
 
 curl -fsL https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml --output bookstore.yaml
 sleep 10
-mesheryctl system login --provider None
-mesheryctl mesh deploy adapter meshery-osm:10009
+#mesheryctl system login --provider None
+echo | mesheryctl mesh deploy adapter meshery-osm:10009 --token "./.github/workflows/auth.json"
 echo "Onboarding application... Standby for few minutes..."
-mesheryctl app onboard -f "./bookstore.yaml"
+mesheryctl app onboard -f "./bookstore.yaml" -s "Kubernetes Manifest" --token "./.github/workflows/auth.json"
 #mesheryctl pattern apply -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml" --token "./.github/workflows/auth.json"
 
 sleep 100

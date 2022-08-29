@@ -52,9 +52,6 @@ jobs:
           chmod +x .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
           .github/workflows/scripts/${{ github.event.inputs.service_mesh }}_deploy.sh
         shell: bash
-
-      - name: Initiate tmate session
-        uses: mxschmitt/action-tmate@v3
         
       - name: Run Benchmark Tests
         uses: layer5io/meshery-smp-action@master
