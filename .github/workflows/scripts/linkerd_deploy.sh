@@ -18,6 +18,7 @@ curl -fsL https://run.linkerd.io/emojivoto.yml --output emojivoto.yml
 sleep 10
 #mesheryctl system login --provider None
 echo | mesheryctl mesh deploy adapter meshery-linkerd:10001 --token "./.github/workflows/auth.json"
+sleep 200
 echo "Onboarding application... Standby for few minutes..."
 #mesheryctl app onboard -f "./emojivoto.yml" -s "Kubernetes Manifest" --token "./.github/workflows/auth.json"
 mesheryctl pattern apply -f "./emojivoto.yml" --token "./.github/workflows/auth.json"

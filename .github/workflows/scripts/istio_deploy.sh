@@ -16,12 +16,12 @@ fi
 sleep 10
 #mesheryctl system login --provider None
 echo | mesheryctl mesh deploy adapter meshery-istio:10000 --namespace "istio-system" --token "./.github/workflows/auth.json"
-sleep 100
+sleep 200
 echo "Onboarding application... Standby for few minutes..."
 mesheryctl pattern apply -f "https://raw.githubusercontent.com/service-mesh-patterns/service-mesh-patterns/master/samples/bookInfoPattern.yaml" --token "./.github/workflows/auth.json"
 
 # Wait for the application to be ready
-sleep 50
+sleep 100
 
 # Get the gateway URL and export it and
 # Expose the service inside the cluster
