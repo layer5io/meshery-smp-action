@@ -18,17 +18,16 @@ curl -fsL https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manife
 sleep 10
 #mesheryctl system login --provider None
 echo | mesheryctl mesh deploy adapter meshery-osm:10009 --token "./.github/workflows/auth.json"
+sleep 200
 echo "Onboarding application... Standby for few minutes..."
 #mesheryctl app onboard -f "./bookstore.yaml" -s "Kubernetes Manifest" --token "./.github/workflows/auth.json"
 mesheryctl pattern apply -f "https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml" --token "./.github/workflows/auth.json"
 
+# Wait for the application to be ready
 sleep 100
 
 kubectl get deployments -n bookstore
 kubectl get pods -n bookstore
-
-# Wait for the application to be ready
-sleep 100
 
 # Expose the application outside the cluster
 # backend="$1"
