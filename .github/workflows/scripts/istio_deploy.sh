@@ -13,8 +13,11 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
     curl -L https://meshery.io/install | ADAPTERS=istio PLATFORM=kubernetes bash -
 fi
 
-sleep 10
+sleep 200
+kubectl get pods -n meshery
+echo "Meshery has been installed."
 #mesheryctl system login --provider None
+echo "Deploying meshery istio adapter..."
 echo | mesheryctl mesh deploy adapter meshery-istio:10000 --namespace "istio-system" --token "./.github/workflows/auth.json"
 sleep 200
 echo "Onboarding application... Standby for few minutes..."

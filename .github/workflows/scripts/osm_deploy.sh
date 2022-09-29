@@ -15,8 +15,13 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
 fi
 
 curl -fsL https://raw.githubusercontent.com/openservicemesh/osm-docs/main/manifests/apps/bookstore.yaml --output bookstore.yaml
-sleep 10
+
+sleep 200 
 #mesheryctl system login --provider None
+echo "Meshery has been installed."
+kubectl get pods -n meshery
+
+echo "Deploying meshery osm adapter..."
 echo | mesheryctl mesh deploy adapter meshery-osm:10009 --token "./.github/workflows/auth.json"
 sleep 200
 echo "Onboarding application... Standby for few minutes..."

@@ -15,7 +15,12 @@ if ! [ -x "$(command -v mesheryctl)" ]; then
 fi
 
 curl -fsL https://run.linkerd.io/emojivoto.yml --output emojivoto.yml
-sleep 10
+
+sleep 200
+echo "Meshery has been installed."
+kubectl get pods -n meshery
+
+echo "Deploying meshery linkerd adapter..."
 #mesheryctl system login --provider None
 echo | mesheryctl mesh deploy adapter meshery-linkerd:10001 --token "./.github/workflows/auth.json"
 sleep 200
