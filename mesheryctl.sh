@@ -43,7 +43,7 @@ main() {
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
 		
 	else
-		for mesh in "${!adapters[@]}"
+		for service_mesh in "${!adapters[@]}"
 		do
 			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
@@ -63,7 +63,7 @@ main() {
 		echo "Load Generator: $load_generator"
 
 		echo "Running test with test configuration file $perf_filename"
-		(mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator" $perf_profile_name -y)
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator" $perf_profile_name -y
 	fi
 }
 
