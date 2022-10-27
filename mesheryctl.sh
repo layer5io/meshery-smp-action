@@ -6,10 +6,8 @@ declare -A adapters
 adapters["istio"]=meshery-istio:10000
 adapters["linkerd"]=meshery-linkerd:10001
 adapters["consul"]=meshery-consul:10002
-adapters["octarine"]=meshery-octarine:10003
 adapters["network_service_mesh"]=meshery-nsm:10004
 adapters["kuma"]=meshery-kuma:10007
-adapters["cpx"]=meshery-cpx:10008
 adapters["open_service_mesh"]=meshery-osm:10009
 adapters["traefik_mesh"]=meshery-traefik-mesh:10006
 
@@ -32,8 +30,8 @@ main() {
 		if [[ $service_mesh != "null" ]]
 		then
 
-			shortName=$(echo ${adapters["$service_mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
-
+			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
+			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 			docker network connect bridge meshery_meshery_1
 			docker network connect minikube meshery_meshery_1
 			docker network connect bridge meshery_meshery-"$shortName"_1
@@ -47,7 +45,8 @@ main() {
 	else
 		for mesh in "${!adapters[@]}"
 		do
-			shortName=$(echo ${adapters["$mesh"]} | cut -d '-' -f2 | cut -d ':' -f1)
+			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
+			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 
 			docker network connect bridge meshery_meshery-"$shortName"_1
 			docker network connect minikube meshery_meshery-"$shortName"_1
@@ -64,7 +63,7 @@ main() {
 		echo "Load Generator: $load_generator"
 
 		echo "Running test with test configuration file $perf_filename"
-		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator" $perf_profile_name --yes
+		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator" $perf_profile_name 
 	fi
 }
 
