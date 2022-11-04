@@ -28,11 +28,12 @@ jobs:
         load-generator: ['fortio', 'wrk2']
     steps:
       - name: Setup Kubernetes
-        uses: manusa/actions-setup-minikube@v2.4.3
+        uses: manusa/actions-setup-minikube@v2.7.1
         with:
           minikube version: 'v1.23.2'
           kubernetes version: 'v1.23.2'
           driver: docker
+          start args: --cpus 4 --disk-size 10000mb
 
       - name: Checkout Code
         uses: actions/checkout@v2
