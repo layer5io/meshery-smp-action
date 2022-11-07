@@ -34,8 +34,8 @@ main() {
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 			docker network connect bridge meshery_meshery_1
 			docker network connect minikube meshery_meshery_1
-			docker network connect bridge meshery_meshery-"$shortName"_1
-			docker network connect minikube meshery_meshery-"$shortName"_1
+			docker network connect bridge meshery_meshery_"$shortName"_1
+			docker network connect minikube meshery_meshery_"$shortName"_1
 
 			mesheryctl system config minikube -t ~/auth.json
 		fi
@@ -48,8 +48,8 @@ main() {
 			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 
-			docker network connect bridge meshery_meshery-"$shortName"_1
-			docker network connect minikube meshery_meshery-"$shortName"_1
+			docker network connect bridge meshery_meshery_"$shortName"_1
+			docker network connect minikube meshery_meshery_"$shortName"_1
 		done
 
 		docker network connect bridge meshery_meshery_1
