@@ -41,7 +41,7 @@ jobs:
           minikube version: v1.23.2 
           kubernetes version: v1.23.2
           driver: docker
-          memory: 10000m
+          memory: 5120m
 
       - name: Checkout Code
         uses: actions/checkout@v2
