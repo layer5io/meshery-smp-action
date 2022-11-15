@@ -32,10 +32,10 @@ main() {
 
 			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
-			docker network connect bridge meshery_meshery_1
-			docker network connect minikube meshery_meshery_1
-			docker network connect bridge meshery_meshery_"$shortName"_1
-			docker network connect minikube meshery_meshery_"$shortName"_1
+			docker network connect bridge meshery-meshery-1
+			docker network connect minikube meshery-meshery-1
+			docker network connect bridge meshery-meshery-"$shortName"-1
+			docker network connect minikube meshery-meshery-"$shortName"-1
 
 			mesheryctl system config minikube -t ~/auth.json
 		fi
@@ -48,12 +48,12 @@ main() {
 			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 
-			docker network connect bridge meshery_meshery_"$shortName"_1
-			docker network connect minikube meshery_meshery_"$shortName"_1
+			docker network connect bridge meshery-meshery-"$shortName"-1
+			docker network connect minikube meshery-meshery-"$shortName"-1
 		done
 
-		docker network connect bridge meshery_meshery_1
-		docker network connect minikube meshery_meshery_1
+		docker network connect bridge meshery-meshery-1
+		docker network connect minikube meshery-meshery-1
 		mesheryctl system config minikube -t ~/auth.json
 
 		echo "Configuration file: $perf_filename"
