@@ -85,12 +85,12 @@ jobs:
           sudo systemctl status docker
 
       - name: Setup Kubernetes
-        uses: manusa/actions-setup-minikube@v2.7.0
+        uses: medyagh/setup-minikube@v0.0.8
         with:
           minikube version: 'v1.23.2'
           kubernetes version: 'v1.23.2'
           driver: docker
-          start args: --disk-size 10000mb
+          memory: 10000m
 
       - name: Checkout Code
         uses: actions/checkout@v2
