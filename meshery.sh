@@ -46,7 +46,7 @@ create_k8s_cluster() {
 	sudo apt update -y
 	sudo apt install conntrack
 	minikube version
-	minikube start --driver=none --kubernetes-version=v1.20.7
+	minikube start --driver=none --kubernetes-version=v1.23.2
 	sleep 40
 }
 
