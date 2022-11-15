@@ -90,7 +90,7 @@ jobs:
 
       - name: Start minikube 
         run: |
-          sudo minikube start
+          minikube start
           kubectl get po -A
 
       - name: Checkout Code
