@@ -83,14 +83,16 @@ jobs:
           sudo apt-cache policy docker-ce
           sudo apt install -y docker-ce
           sudo systemctl status docker
+          sudo mkdir -p ~/.kube
+          sudo chmod 777 ~/.kube
 
       - name: Setup Kubernetes
-        uses: medyagh/setup-minikube@v0.0.8
+        uses: manusa/setup-minikube@v2.6.1
         with:
           minikube version: 'v1.23.2'
           kubernetes version: 'v1.23.2'
           driver: docker
-          memory: 10000m
+          start-args: --disk-size 10000mb
 
       - name: Checkout Code
         uses: actions/checkout@v2
