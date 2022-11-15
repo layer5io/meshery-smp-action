@@ -28,7 +28,7 @@ jobs:
         load-generator: ['fortio', 'wrk2']
     steps:
       - name: Setup Kubernetes
-        uses: manusa/actions-setup-minikube@v2.7.1
+        uses: manusa/actions-setup-minikube@v2.7.0
         with:
           minikube version: 'v1.23.2'
           kubernetes version: 'v1.23.2'
@@ -72,7 +72,7 @@ jobs:
         test-configuration: ['load-test.yaml','soak-test.yaml']
     steps:
       - name: Setup Kubernetes
-        uses: manusa/actions-setup-minikube@v2.7.1
+        uses: manusa/actions-setup-minikube@v2.7.0
         with:
           minikube version: 'v1.23.2'
           kubernetes version: 'v1.23.2'
