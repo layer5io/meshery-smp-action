@@ -90,7 +90,7 @@ jobs:
 
       - name: Start minikube 
         run: |
-          minikube start
+          minikube start --memory 5000 
           kubectl get po -A
 
       - name: Checkout Code
