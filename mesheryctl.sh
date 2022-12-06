@@ -31,6 +31,7 @@ main() {
 		then
 
 			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
+			echo $shortName
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 			docker network connect bridge meshery_meshery_1
 			docker network connect minikube meshery_meshery_1
