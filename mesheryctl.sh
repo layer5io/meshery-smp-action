@@ -40,6 +40,8 @@ main() {
 			mesheryctl system config minikube -t ~/auth.json
 		fi
 		echo "Running test with performance profile $perf_profile_name"
+		echo "File content:"
+		cat $perf_profile_name
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
 		
 	else
