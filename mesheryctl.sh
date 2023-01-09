@@ -40,8 +40,6 @@ main() {
 			mesheryctl system config minikube -t ~/auth.json
 		fi
 		echo "Running test with performance profile $perf_profile_name"
-		echo "File content:"
-		cat $perf_profile_name
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
 		
 	else
@@ -63,10 +61,9 @@ main() {
 		echo "Service Mesh: $service_mesh"
 		echo "Test Name: $test_name"
 		echo "Load Generator: $load_generator"
+		echo "Profile name: $perf_profile_name"
 
 		echo "Running test with test configuration file $perf_filename"
-		echo "File content:"
-		cat $GITHUB_WORKSPACE/.github/$perf_filename
 		mesheryctl perf apply --file $GITHUB_WORKSPACE/.github/$perf_filename -t ~/auth.json --url "$endpoint_url" --mesh "$service_mesh" --name "$test_name" --load-generator "$load_generator" $perf_profile_name -y
 	fi
 }
