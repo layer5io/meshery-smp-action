@@ -39,6 +39,8 @@ main() {
 
 			mesheryctl system config minikube -t ~/auth.json
 		fi
+		rand_string=$(openssl rand -hex 3)
+		perf_profile_name="$rand_string-$perf_profile_name"
 		echo "Running test with performance profile $perf_profile_name"
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
 		
@@ -55,7 +57,10 @@ main() {
 		docker network connect bridge meshery_meshery_1
 		docker network connect minikube meshery_meshery_1
 		mesheryctl system config minikube -t ~/auth.json
-
+		
+		rand_string=$(openssl rand -hex 3)
+		perf_profile_name="$rand_string-$perf_profile_name"
+		
 		echo "Configuration file: $perf_filename"
 		echo "Endpoint URL: $endpoint_url"
 		echo "Service Mesh: $service_mesh"
