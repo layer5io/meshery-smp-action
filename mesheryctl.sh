@@ -36,7 +36,7 @@ main() {
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 			if [[ -z $shortName ]]
 			then
-				echo "'shortName' value is empty. Provide a valid profile name with service mesh, else contact us to raise an issue!"
+				echo "'shortName' value is empty. Provide a valid profile containing with service mesh name, else contact us to raise an issue!"
 			else 
 				docker network connect bridge meshery_meshery_1
 				docker network connect minikube meshery_meshery_1
@@ -57,7 +57,7 @@ main() {
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 			if [[ -z $shortName ]]
 			then
-				echo "'shortName' value is empty. Provide a valid profile name with service mesh, else contact us to raise an issue!"
+				echo "'shortName' value is empty. Provide a valid profile containing with service mesh name, else contact us to raise an issue!"
 				break
 			else 
 				docker network connect bridge meshery_meshery-"$shortName"_1
