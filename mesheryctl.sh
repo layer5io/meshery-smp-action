@@ -26,10 +26,10 @@ main() {
 	then
 		# get the mesh name from performance test config
 		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
-
+		echo "Checking service mesh list from given profile"
+		echo $service_mesh
 		if [[ $service_mesh != "null" ]]
 		then
-
 			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
 			echo $shortName
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
