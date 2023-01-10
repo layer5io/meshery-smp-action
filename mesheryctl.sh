@@ -28,8 +28,9 @@ main() {
 		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
 		echo "Checking service mesh list from given profile"
 		echo $service_mesh
-		if [[ $service_mesh != "null" ]]
+		if [[ -n $service_mesh ]]
 		then
+			echo "Service mesh is present from profile. Executing..."
 			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
 			echo $shortName
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
@@ -44,6 +45,7 @@ main() {
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
 		
 	else
+		echo "Service mesh name is not present from profile. Executing all cases..."
 		for service_mesh in ${!adapters[@]}
 		do
 			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
