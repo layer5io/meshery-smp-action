@@ -37,6 +37,7 @@ main() {
 			if [[ -z $shortName ]]
 			then
 				echo "'shortName' value is empty. Provide a valid profile containing with service mesh name, else contact us to raise an issue!"
+				exit 1
 			else 
 				docker network connect bridge meshery_meshery-"$shortName"_1
 				docker network connect minikube meshery_meshery-"$shortName"_1
@@ -45,8 +46,8 @@ main() {
 			docker network connect minikube meshery_meshery_1
 			mesheryctl system config minikube -t ~/auth.json
 		fi
-		rand_string=$(openssl rand -hex 3)
-		perf_profile_name="$rand_string-$perf_profile_name"
+		#rand_string=$(openssl rand -hex 3)
+		#perf_profile_name="$rand_string-$perf_profile_name"
 		echo "Running test with performance profile $perf_profile_name"
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
 		
@@ -58,7 +59,6 @@ main() {
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 			docker network connect bridge meshery_meshery-"$shortName"_1
 			docker network connect minikube meshery_meshery-"$shortName"_1
-
 		done
 		
 		docker network connect bridge meshery_meshery_1
