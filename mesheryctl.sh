@@ -30,7 +30,7 @@ main() {
 		echo $service_mesh
 		if [[ $service_mesh != "null" ]]
 		then
-			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
+			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
 			echo $shortName
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 			docker network connect bridge meshery_meshery_1
@@ -44,9 +44,9 @@ main() {
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
 		
 	else
-		for service_mesh in "${!adapters[@]}"
+		for service_mesh in ${!adapters[@]}
 		do
-			shortName=$(echo ${adapters["$service_mesh"]} | cut -d ':' -f1)
+			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
 
 			docker network connect bridge meshery_meshery-"$shortName"_1

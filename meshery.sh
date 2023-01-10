@@ -13,7 +13,7 @@ main() {
 
 	parse_command_line "$@"
 
-	echo "Checking if a k8s cluster exits..."
+	echo "Checking if a k8s cluster exists..."
 	if kubectl config current-context
 	then
 		echo "Cluster found"
