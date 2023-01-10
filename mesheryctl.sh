@@ -26,11 +26,11 @@ main() {
 	then
 		# get the mesh name from performance test config
 		service_mesh=$(mesheryctl perf view $perf_profile_name -t ~/auth.json -o json 2>&1 | jq '."service_mesh"' | tr -d '"')
-		echo "Checking service mesh list from given profile"
-		echo $service_mesh
+		echo "Checking service mesh list from given profile..."
+		#echo $service_mesh
 		if [[ -n $service_mesh ]]
 		then
-			echo "Service mesh is present from profile. Executing..."
+			echo "Service mesh is present from profile."
 			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
 			echo $shortName
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
@@ -38,12 +38,11 @@ main() {
 			then
 				echo "'shortName' value is empty. Provide a valid profile containing with service mesh name, else contact us to raise an issue!"
 			else 
-				docker network connect bridge meshery_meshery_1
-				docker network connect minikube meshery_meshery_1
 				docker network connect bridge meshery_meshery-"$shortName"_1
 				docker network connect minikube meshery_meshery-"$shortName"_1
 			fi
-
+			docker network connect bridge meshery_meshery_1
+			docker network connect minikube meshery_meshery_1
 			mesheryctl system config minikube -t ~/auth.json
 		fi
 		rand_string=$(openssl rand -hex 3)
@@ -52,19 +51,13 @@ main() {
 		mesheryctl perf apply $perf_profile_name -t ~/auth.json --yes
 		
 	else
-		echo "Service mesh name is not present from profile. Executing all cases..."
+		echo "Executing from given test config file..."
 		for service_mesh in ${!adapters[@]}
 		do
 			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
-			if [[ -z $shortName ]]
-			then
-				echo "'shortName' value is empty. Provide a valid profile containing with service mesh name, else contact us to raise an issue!"
-				break
-			else 
-				docker network connect bridge meshery_meshery-"$shortName"_1
-				docker network connect minikube meshery_meshery-"$shortName"_1
-			fi
+			docker network connect bridge meshery_meshery-"$shortName"_1
+			docker network connect minikube meshery_meshery-"$shortName"_1
 
 		done
 		
