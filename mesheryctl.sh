@@ -34,10 +34,15 @@ main() {
 			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
 			echo $shortName
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
-			docker network connect bridge meshery_meshery_1
-			docker network connect minikube meshery_meshery_1
-			docker network connect bridge meshery_meshery-"$shortName"_1
-			docker network connect minikube meshery_meshery-"$shortName"_1
+			if [[ -z $shortName ]]
+			then
+				echo "'shortName' value is empty. Provide a valid profile name with service mesh, else contact us to raise an issue!"
+			else 
+				docker network connect bridge meshery_meshery_1
+				docker network connect minikube meshery_meshery_1
+				docker network connect bridge meshery_meshery-"$shortName"_1
+				docker network connect minikube meshery_meshery-"$shortName"_1
+			fi
 
 			mesheryctl system config minikube -t ~/auth.json
 		fi
@@ -50,11 +55,17 @@ main() {
 		do
 			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
 			shortName=${shortName#meshery-} #remove the prefix "meshery-"
+			if [[ -z $shortName ]]
+			then
+				echo "'shortName' value is empty. Provide a valid profile name with service mesh, else contact us to raise an issue!"
+				break
+			else 
+				docker network connect bridge meshery_meshery-"$shortName"_1
+				docker network connect minikube meshery_meshery-"$shortName"_1
+			fi
 
-			docker network connect bridge meshery_meshery-"$shortName"_1
-			docker network connect minikube meshery_meshery-"$shortName"_1
 		done
-
+		
 		docker network connect bridge meshery_meshery_1
 		docker network connect minikube meshery_meshery_1
 		mesheryctl system config minikube -t ~/auth.json
