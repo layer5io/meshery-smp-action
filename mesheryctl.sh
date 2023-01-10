@@ -45,6 +45,10 @@ main() {
 			docker network connect bridge meshery_meshery_1
 			docker network connect minikube meshery_meshery_1
 			mesheryctl system config minikube -t ~/auth.json
+
+		else
+			echo "Service mesh not found from profile. Invalid profile name has been provided"
+			exit 1
 		fi
 		#rand_string=$(openssl rand -hex 3)
 		#perf_profile_name="$rand_string-$perf_profile_name"
@@ -53,13 +57,11 @@ main() {
 		
 	else
 		echo "Executing from given test config file..."
-		for service_mesh in ${!adapters[@]}
-		do
-			shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
-			shortName=${shortName#meshery-} #remove the prefix "meshery-"
-			docker network connect bridge meshery_meshery-"$shortName"_1
-			docker network connect minikube meshery_meshery-"$shortName"_1
-		done
+		#echo $service_mesh
+		shortName=$(echo ${adapters[$service_mesh]} | cut -d ':' -f1)
+		shortName=${shortName#meshery-} #remove the prefix "meshery-"
+		docker network connect bridge meshery_meshery-"$shortName"_1
+		docker network connect minikube meshery_meshery-"$shortName"_1
 		
 		docker network connect bridge meshery_meshery_1
 		docker network connect minikube meshery_meshery_1
