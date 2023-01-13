@@ -41,7 +41,6 @@ jobs:
           minikube version: v1.23.2 
           kubernetes version: v1.23.2
           driver: docker
-          start args: --disk-size 10000mb
 
       - name: Checkout Code
         uses: actions/checkout@v2
