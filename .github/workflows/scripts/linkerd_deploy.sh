@@ -21,15 +21,17 @@ echo "Meshery has been installed."
 kubectl get pods -n meshery
 
 echo "Deploying meshery linkerd adapter..."
-#mesheryctl system login --provider None
+mesheryctl system login --provider None
 echo | mesheryctl mesh deploy adapter meshery-linkerd:10001 --token "./.github/workflows/auth.json"
 sleep 200
 echo "Onboarding application... Standby for few minutes..."
 #mesheryctl app onboard -f "./emojivoto.yml" -s "Kubernetes Manifest" --token "./.github/workflows/auth.json"
-mesheryctl pattern apply -f "./emojivoto.yml" --token "./.github/workflows/auth.json"
+mesheryctl app onboard -f "./emojivoto.yml" --token "./.github/workflows/auth.json"
 
 # Wait for the application to be ready
 sleep 100
+
+kubectl get namespace
 
 echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
 echo "Endpoint URL: http://localhost:8080"
