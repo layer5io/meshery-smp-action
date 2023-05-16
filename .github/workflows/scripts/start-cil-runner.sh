@@ -17,8 +17,9 @@ user_data_scripts="#cloud-config\nusers:\n    - default\n    - name: smp\n      
 
 # TODO: the options "operating_system", "facility", "plan" are hardcoded now, we should make them configurable
 # https://metal.equinix.com/developers/api/devices/#devices-createdevice
+termination_time=`date --utc -d "110 minute" +"%FT%TZ"`
 device_id=$(curl -X POST -H "X-Auth-Token: $token" -s -H "Content-Type: application/json" \
--d '{"operating_system": "ubuntu_20_04", "facility": "da11", "plan": "c3.small.x86", "hostname": "'"${hostname}"'", "userdata": "'"${user_data_scripts}"'"}' \
+-d '{"operating_system": "ubuntu_20_04", "facility": "da11", "plan": "c3.small.x86", "hostname": "'"${hostname}"'", "userdata": "'"${user_data_scripts}"'", "termination_time": "'"${termination_time}"'"}' \
 https://api.equinix.com/metal/v1/projects/96a9d336-541b-42f7-9827-d845010da550/devices | jq -r .id)
 if [[ -z $device_id ]]; then
     echo "ERROR: Failed to create CNCF CIL machine: $hostname..."
