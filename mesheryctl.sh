@@ -67,8 +67,7 @@ main() {
 		docker network connect minikube meshery_meshery_1
 		mesheryctl system config minikube -t ~/auth.json
 		
-		rand_string=$(openssl rand -hex 3)
-		perf_profile_name="$rand_string-$perf_profile_name"
+		perf_profile_name="smp-$perf_profile_name"
 		
 		echo "Configuration file: $perf_filename"
 		echo "Endpoint URL: $endpoint_url"
