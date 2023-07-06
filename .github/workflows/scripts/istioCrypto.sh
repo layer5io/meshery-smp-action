@@ -32,7 +32,7 @@ sleep 400
 mesheryctl system start
 
 # Applying/deploying crpyto pattern
-mesheryctl pattern apply -f ./AadiCrypto.yaml
+mesheryctl pattern apply -f ../CryptoMB-design.yaml
 
 sleep 200
 
@@ -40,7 +40,7 @@ sleep 200
 kubectl get all -n istio-operator
 
 # deplyoing httbin application
-mesheryctl app onboard -f  ./httbin.yaml -s "Kubernetes Manifest"
+mesheryctl app onboard -f  ../httbin.yaml -s "Kubernetes Manifest"
 
 sleep 100
 
