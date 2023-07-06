@@ -40,7 +40,7 @@ sleep 200
 kubectl get all -n istio-operator
 
 # deplyoing httbin application
-mesheryctl app onboard -f  ../httbin.yaml -s "Kubernetes Manifest"
+mesheryctl app onboard -f  ../httpbin.yaml -s "Kubernetes Manifest"
 
 sleep 100
 
