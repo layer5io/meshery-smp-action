@@ -64,8 +64,3 @@ echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
 echo "Gateway URL: $GATEWAY_URL"
 echo "ENDPOINT_URL=$GATEWAY_URL/productpage" >> $GITHUB_ENV
 echo "SERVICE_MESH=$SERVICE_MESH" >> $GITHUB_ENV
-
-
-
-
-
