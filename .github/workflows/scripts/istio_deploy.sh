@@ -9,6 +9,8 @@ export SERVICE_MESH='ISTIO'
 
 # Check if mesheryctl is present, else install it
 if ! [ -x "$(command -v mesheryctl)" ]; then
+    kubectl config view --minify --flatten > ~/minified_config
+	mv ~/minified_config ~/.kube/config
     echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
     curl -L https://meshery.io/install | ADAPTERS=istio PLATFORM=kubernetes bash -
 fi
