@@ -171,8 +171,8 @@ jobs:
       - name: Deploy k8s-minikube
         uses: manusa/actions-setup-minikube@v2.4.1
         with:
-          minikube version: 'v1.21.0'
-          kubernetes version: 'v1.20.7'
+          minikube version: 'v1.30.1'
+          kubernetes version: 'v1.27.3'
           driver: docker
 
       - name: Run Performance Test
