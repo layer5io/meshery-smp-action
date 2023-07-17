@@ -96,27 +96,32 @@ jobs:
           istioctl operator init
           pwd
 
-          kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=v0.6.2" | kubectl apply -f -; 
+         
       
       - name: MeshModel Component Register Check
         run: |
               kubectl config view --minify --flatten > ~/minified_config
               mv ~/minified_config ~/.kube/config
               echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
-              curl -L https://meshery.io/install | ADAPTERS=istio PLATFORM=kubernetes bash -
+              # curl -L https://meshery.io/install | ADAPTERS=istio PLATFORM=kubernetes bash -
+
+              output=$(curl -L https://meshery.io/install | PLATFORM=kubernetes bash - 2>&1)
+              echo $output
+              url=$(echo "$output" | grep -oP 'http://\S+' | tail -1)
+              echo "Generated URL: $url"
 
               #forces meshery to register components and checks 
-              curl --location 'localhost:9081/api/system/sync' \
-                  --header 'meshery-token:${{ secrets.MESHERY_TOKEN }} \
-                  --header 'Cookie: meshery-provider=Meshery; meshery.layer5.io_ref=/;token=${{ secrets.MESHERY_TOKEN }}
+              curl --location "${url}/api/system/sync" \
+                  --header 'meshery-token:${{ secrets.MESHERY_TOKEN }}' \
+                  --header 'Cookie: meshery-provider=Meshery; meshery.layer5.io_ref=/;token=${{ secrets.MESHERY_TOKEN }}'
 
-              curl --location 'localhost:9081/api/system/sync' \
-                  --header 'meshery-token:${{ secrets.MESHERY_TOKEN }} \
-                  --header 'Cookie: meshery-provider=Meshery; meshery.layer5.io_ref=/;token=${{ secrets.MESHERY_TOKEN }}
+              curl --location "${url}/api/system/sync" \
+                  --header 'meshery-token:${{ secrets.MESHERY_TOKEN }}' \
+                  --header 'Cookie: meshery-provider=Meshery; meshery.layer5.io_ref=/;token=${{ secrets.MESHERY_TOKEN }}'
 
               check_endpoint() {
-                  response=$(curl -s http://localhost:9081/api/meshmodels/models/kubernetes/components/IstioOperator \
-                       -H 'Cookie: meshery-provider=Meshery;token=${{ secrets.MESHERY_TOKEN }}
+                  response=$(curl -s "${url}/api/meshmodels/models/kubernetes/components/IstioOperator" \
+                       -H 'Cookie: meshery-provider=Meshery;token=${{ secrets.MESHERY_TOKEN }}'
                       )
                   total_count=$(echo "$response" | grep -oP '(?<="total_count":)\d+')
                   
