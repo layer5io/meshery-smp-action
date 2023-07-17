@@ -6,13 +6,6 @@
 export MESH_NAME='Istio'
 export SERVICE_MESH='ISTIO'
 
-# Check if mesheryctl is present, else install it
-if ! [ -x "$(command -v mesheryctl)" ]; then
-    echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
-    curl -L https://meshery.io/install | ADAPTERS=istio PLATFORM=kubernetes bash -
-fi
-
-sleep 200
 kubectl get pods -n meshery
 
 echo "Meshery has been installed."
@@ -22,25 +15,20 @@ echo "Meshery has been installed."
 
 sleep 200
 
-kubectl get all -n istio-system
 
 # so that istio operator gets initialized
-mesheryctl system stop
-
-sleep 400
-
-mesheryctl system start
 
 # Applying/deploying crpyto pattern
-mesheryctl pattern apply -f ../CryptoMB-design.yaml
+echo "Applying IstioCrypto Design"
+mesheryctl pattern apply -f ../CryptoMB-design.yaml --token "./.github/workflows/auth.json"
 
 sleep 200
-
 
 kubectl get all -n istio-operator
 
 # deplyoing httbin application
-mesheryctl app onboard -f  ../httpbin.yaml -s "Kubernetes Manifest"
+echo "OnBoarding IstioCrypto Design"
+mesheryctl app onboard -f  ../httpbin.yaml -s "Kubernetes Manifest" --token "./.github/workflows/auth.json"
 
 sleep 100
 
@@ -62,5 +50,5 @@ export GATEWAY_URL=http://$INGRESS_HOST:$INGRESS_PORT/headers
 
 echo "Service Mesh: $MESH_NAME - $SERVICE_MESH"
 echo "Gateway URL: $GATEWAY_URL"
-echo "ENDPOINT_URL=$GATEWAY_URL/productpage" >> $GITHUB_ENV
+echo "ENDPOINT_URL=$GATEWAY_URL >> $GITHUB_ENV
 echo "SERVICE_MESH=$SERVICE_MESH" >> $GITHUB_ENV

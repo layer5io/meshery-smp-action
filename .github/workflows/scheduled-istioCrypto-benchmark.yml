@@ -20,12 +20,6 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'schedule' }}
-    # strategy:
-    #   fail-fast: false
-    #   matrix:
-    #     service-mesh: ['istio', 'linkerd', 'osm']
-    #     load-generator: ['fortio', 'wrk2']
-    #     test-configuration: ['load-test','soak-test']
     outputs:
       github_run_id: ${{ env.GITHUB_RUN_ID }} # use this github_run_id as a suffix for CIL machines and runners
     steps:
@@ -64,12 +58,6 @@ jobs:
       - start-runners-scheduled
     runs-on: istioCrypto-fortio-load-${{ github.run_id }}
     if: ${{ github.event_name == 'schedule' }}
-    strategy:
-      # fail-fast: false
-      # matrix:
-      #   service-mesh: ['istio', 'linkerd', 'osm']
-      #   load-generator: ['fortio', 'wrk2']
-      #   test-configuration: ['load-test','soak-test']
     steps:
       - name: Install dependencies
         run: |
@@ -99,6 +87,60 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
+      - name: Install Istio Operator and Gateway CRD
+        run: |
+          cat /proc/cpuinfo | grep avx
+          curl -L https://istio.io/downloadIstio | sh -
+          cd istio-1.18.0
+          export PATH=$PWD/bin:$PATH
+          istioctl operator init
+          pwd
+
+          kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=v0.6.2" | kubectl apply -f -; 
+      
+      - name: MeshModel Component Register Check
+        run: |
+              kubectl config view --minify --flatten > ~/minified_config
+              mv ~/minified_config ~/.kube/config
+              echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
+              curl -L https://meshery.io/install | ADAPTERS=istio PLATFORM=kubernetes bash -
+
+              #forces meshery to register components and checks 
+              curl --location 'localhost:9081/api/system/sync' \
+                  --header 'meshery-token:${{ secrets.MESHERY_TOKEN }} \
+                  --header 'Cookie: meshery-provider=Meshery; meshery.layer5.io_ref=/;token=${{ secrets.MESHERY_TOKEN }}
+
+              curl --location 'localhost:9081/api/system/sync' \
+                  --header 'meshery-token:${{ secrets.MESHERY_TOKEN }} \
+                  --header 'Cookie: meshery-provider=Meshery; meshery.layer5.io_ref=/;token=${{ secrets.MESHERY_TOKEN }}
+
+              check_endpoint() {
+                  response=$(curl -s http://localhost:9081/api/meshmodels/models/kubernetes/components/IstioOperator \
+                       -H 'Cookie: meshery-provider=Meshery;token=${{ secrets.MESHERY_TOKEN }}
+                      )
+                  total_count=$(echo "$response" | grep -oP '(?<="total_count":)\d+')
+                  
+                  if [[ $total_count -ne 0 ]]; then
+                      echo "Components Registered"
+                      exit 0
+                  fi
+              }
+
+              # Set the duration for script execution (in seconds)
+              duration=$((5 * 60))
+
+              # Calculate the end time
+              end_time=$((SECONDS + duration))
+
+              # Loop until the end time is reached
+              while [[ $SECONDS -lt $end_time ]]; do
+                  check_endpoint
+                  echo "Checked, Components not registered"
+                  sleep 60
+              done
+
+              echo "Waited for 5 minutes components not registered"
+
       - name: Deploy Istio Crypto design and deploy httpbin application
         run: |
           chmod +x .github/workflows/scripts/istioCrypto.sh
@@ -114,11 +156,11 @@ jobs:
         with:
           provider_token: ${{ secrets.MESHERY_TOKEN }}
           platform: docker
-          profile_filename: ${{ matrix.test-configuration }}.yaml
+          profile_filename: load-test.yaml
           endpoint_url: ${{env.ENDPOINT_URL}}
           service_mesh: ${{env.SERVICE_MESH}}
-          load_generator: ${{ matrix.load-generator }}
-          profile_name: 'istioCrypto-${{ matrix.test-configuration }}'
+          load_generator: fortio
+          profile_name: 'istioCrypto-load-test.yaml'
           test_name: '${{ steps.date.outputs.date }}'
 
   stop-runner-scheduled:
@@ -128,17 +170,12 @@ jobs:
       - start-runners-scheduled # required to get output from the start-runner job
       - scheduled-test # required to wait when the main job is done
     runs-on: ubuntu-latest
-    # strategy:
-    #   fail-fast: false
-    #   matrix:
-    #     service-mesh: ['istio', 'linkerd', 'osm']
-    #     load-generator: ['fortio', 'wrk2']
-    #     test-configuration: ['load-test','soak-test']
     if: ${{ always() && github.event_name == 'schedule' }} # required to stop the runner even if the error happened in the previous jobs
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
 
+      
       - name: Stop CNCF CIL runner
         run: |
           chmod +x .github/workflows/scripts/stop-cil-runner.sh
