@@ -20,14 +20,14 @@ sleep 200
 
 # Applying/deploying crpyto pattern
 echo "Applying IstioCrypto Design"
-mesheryctl pattern apply -f ../CryptoMB-design.yaml --token "./.github/workflows/auth.json"
+mesheryctl pattern apply -f ./.github/workflows/CryptoMB-design.yaml --token "./.github/workflows/auth.json"
 
 sleep 200
 
 kubectl get all -n istio-operator
 
 # deplyoing httbin application
-echo "OnBoarding IstioCrypto Design"
+echo "OnBoarding HTTP Design"
 mesheryctl app onboard -f  ../httpbin.yaml -s "Kubernetes Manifest" --token "./.github/workflows/auth.json"
 
 sleep 100
