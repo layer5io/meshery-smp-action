@@ -1,6 +1,6 @@
-# Meshery - SMP GitHub Action
+# Meshery Performance GitHub Action
 
-GitHub Action to run SMP Performance Benchmarks on CI/CD pipelines.
+GitHub Action to characterize the performance of a service or microservice (an HTTP, HTTPS, or gRPC endpoint) using a load generator and statistical analysis. Use Meshery's performance management GitHub Action to establish a performance benchmark and visually compare percent quartiles (e.g. P99) over time. Run performance load tests within your CI/CD pipeline in order to catch performance regressions before they happen.
 
 [Meshery](https://meshery.io/) is the canonical implementation of the [Service Mesh Performance specification](https://smp-spec.io/).
 
