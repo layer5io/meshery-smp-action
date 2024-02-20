@@ -1,10 +1,8 @@
 # Meshery Performance Analysis GitHub Action
 
-GitHub Action to characterize the performance of a service or microservice (an HTTP, HTTPS, or gRPC endpoint) using a load generator and statistical analysis. Use Meshery's performance management GitHub Action to establish a performance benchmark and visually compare percent quartiles (e.g. P99) over time. Run performance load tests within your CI/CD pipeline in order to catch performance regressions before they happen.
+A GitHub Action to characterize the performance of a service or microservice using a load generator and statistical analysis. Use Meshery's performance analysis GitHub Action to establish a performance benchmark and visually compare percentiles (e.g. P99) over time. Integrate performance characterization within your CI/CD pipeline and catch regressions before they happen.
 
-[Meshery](https://meshery.io/) is the canonical implementation of the [Service Mesh Performance specification](https://smp-spec.io/).
-
-THis action supports performance analysis of any accessible HTTP/S endpoint. If the system under test is running on Kubernetes, Meshery will collect additional infrastructure (cluster/node) statistics and include in the analysis. 
+This action supports performance analysis of any accessible HTTP/S endpoint. If the system under test is running on Kubernetes, Meshery will collect additional infrastructure (cluster/node) statistics and include in the analysis.
 
 ## Learn More
 
@@ -184,6 +182,8 @@ jobs:
           platform: docker
           profile_name: soak-test
 ```
+
+[Meshery](https://meshery.io/) is the canonical implementation of the [Service Mesh Performance specification](https://smp-spec.io/).
 
 ## Join the Community!
 
