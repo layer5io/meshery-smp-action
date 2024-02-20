@@ -4,11 +4,14 @@ GitHub Action to characterize the performance of a service or microservice (an H
 
 [Meshery](https://meshery.io/) is the canonical implementation of the [Service Mesh Performance specification](https://smp-spec.io/).
 
+THis action supports performance analysis of any accessible HTTP/S endpoint. If the system under test is running on Kubernetes, Meshery will collect additional infrastructure (cluster/node) statistics and include in the analysis. 
+
 ## Learn More
 
 - [Performance Management in Meshery](https://docs.meshery.io/functionality/performance-management)
 - [Guide: Running Performance Tests in Meshery](https://docs.meshery.io/guides/performance-management)
 
+<!--
 ## Supported Service Meshes
 
 Meshery supports 10 different service meshes.
@@ -101,6 +104,7 @@ Meshery supports 10 different service meshes.
   </p>
 </div>
  </details>
+ -->
 
 ## Usage
 
@@ -117,11 +121,9 @@ See [Performance Management with Meshery](https://docs.meshery.io/guides/perform
 ## SMP Compatible Test Configuration File
 
 ```yaml
-# Test configuration file for running performance benchmarks
-# See: https://docs.meshery.io/guides/performance-management#running-performance-benchmarks-through-mesheryctl
+# Test configuration file for running performance analysis
+# See: https://docs.meshery.io/guides/performance-management
 test:
-  smp_version: v0.0.1
-  
   # The name of the test
   name: Load Test
   labels: {}
@@ -138,13 +140,13 @@ test:
       body: ''
       content_type: ''
       endpoint_urls:
-        - 'https://smp-spec.io'
+        - 'https://getnighthawk.dev'
   duration: 60s
 
-# Service mesh under test in Service Mesh Performance Spec format
+# If testing while using a service mesh, see Service Mesh Performance Spec format
 # See: https://github.com/service-mesh-performance/service-mesh-performance/blob/master/protos/service_mesh.proto
 mesh:
-  type: 3
+  type: 3 # optional
 ```
 
 ## Sample configuration
@@ -152,7 +154,7 @@ mesh:
 See [scheduled-benchmarks.yml](.github/workflows/scheduled-benchmarks.yml) and [configurable-benchmark-test.yml](.github/workflows/configurable-benchmark-test.yaml) for more sample configurations.
 
 ```yaml
-name: Meshery SMP Action
+name: Meshery Performance Analysis Action
 on:
   push:
     branches:
