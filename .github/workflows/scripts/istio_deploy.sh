@@ -31,7 +31,7 @@ curl -fsL http://raw.githubusercontent.com/service-mesh-patterns/service-mesh-pa
 yq e -i '.services.istioinstallation.settings.profile = "default"' minimalistiobookinfo.yaml
 
 cat minimalistiobookinfo.yaml
-mesheryctl pattern apply -f "./minimalistiobookinfo.yaml" --token "./.github/workflows/auth.json"
+mesheryctl design apply -f "./minimalistiobookinfo.yaml" --token "./.github/workflows/auth.json"
 # Wait for the application to be ready
 sleep 300
 
