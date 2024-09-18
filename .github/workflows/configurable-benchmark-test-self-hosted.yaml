@@ -37,7 +37,7 @@ jobs:
       device_id: ${{ steps.start-cil-runner.outputs.device_id }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Configure CNCF CIL credentials
         run: |
@@ -94,7 +94,7 @@ jobs:
           kubectl get po -A
 
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Service Mesh and Deploy Application
         run: |
@@ -124,7 +124,7 @@ jobs:
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Stop CNCF CIL runner
         run: |
