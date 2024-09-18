@@ -32,7 +32,7 @@ jobs:
       github_run_id: ${{ env.GITHUB_RUN_ID }} # use this github_run_id as a suffix for CIL machines and runners
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Configure CNCF CIL credentials
         run: |
@@ -98,7 +98,7 @@ jobs:
           kubectl get po -A
 
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
 
       - name: Install Service Mesh and Deploy Application
@@ -138,7 +138,7 @@ jobs:
     if: ${{ always() && github.event_name == 'workflow_dispatch' }} # required to stop the runner even if the error happened in the previous jobs
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Stop CNCF CIL runner
         run: |
@@ -169,7 +169,7 @@ jobs:
       github_run_id: ${{ env.GITHUB_RUN_ID }} # use this github_run_id as a suffix for CIL machines and runners
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Configure CNCF CIL credentials
         run: |
@@ -236,7 +236,7 @@ jobs:
           kubectl get po -A
 
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Service Mesh and Deploy Application
         run: |
@@ -276,7 +276,7 @@ jobs:
     if: ${{ always() && github.event_name == 'schedule' }} # required to stop the runner even if the error happened in the previous jobs
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Stop CNCF CIL runner
         run: |
