@@ -1,0 +1,195 @@
+name: Scheduled Benchmark Tests on Self-hosted Runner
+on:
+  # for triggering manually, provide a test configuration file name or a performance profile name
+  workflow_dispatch:
+    inputs:
+      profile_name:
+        description: "performance profile to use"
+        required: false
+      profile_filename:
+        description: "test configuration file"
+        required: false
+  # scheduled to run on everyhour
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+# Scheduled Benchmark Test
+  start-runners-scheduled:
+    name: Start self-hosted CNCF CIL runners for scheduled test
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' }}
+    outputs:
+      github_run_id: ${{ env.GITHUB_RUN_ID }} # use this github_run_id as a suffix for CIL machines and runners
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Configure CNCF CIL credentials
+        run: |
+          chmod +x .github/workflows/scripts/self-hosted-credentails.sh 
+          .github/workflows/scripts/self-hosted-credentails.sh ${{ secrets.CNCF_CIL_TOKEN }}
+        shell: bash
+
+      - name: Create registration token for CNCF CIL runner
+        id: getRegToken
+        run: |
+          reg_token=$(curl -s -X POST -H "Accept: application/vnd.github.v3+json" \
+          -H 'Authorization: token ${{ secrets.GH_ACCESS_TOKEN }}' \
+          https://api.github.com/repos/${{github.repository}}/actions/runners/registration-token | jq -r .token)
+          echo REG_TOKEN=$reg_token >> $GITHUB_ENV
+          echo REPOSITORY=${{github.repository}} >> $GITHUB_ENV
+        shell: bash
+
+      # The hostname will be like istioCrypto-fortio-load-1997512481
+      - name: Start CNCF CIL runner
+        id: start-cil-runner
+        run: |
+          echo GITHUB_RUN_ID=${{ github.run_id }} >> $GITHUB_ENV
+          chmod +x .github/workflows/scripts/start-cil-runner.sh
+          .github/workflows/scripts/start-cil-runner.sh ${{ secrets.cncf_cil_token }} istioCrypto-fortio-load
+        shell: bash
+
+  scheduled-test:
+    name: Scheduled Istio-Crypto Benchmark Test
+    timeout-minutes: 60
+    needs:
+      - start-runners-scheduled
+    runs-on: istioCrypto-fortio-load-${{ github.run_id }}
+    if: ${{ github.event_name == 'schedule' }}
+    steps:
+      - name: Install dependencies
+        run: |
+          echo "Current user: $(whoami)"
+          echo "Installing kubectl..."
+          curl -LO https://dl.k8s.io/release/v1.23.2/bin/linux/amd64/kubectl 
+          sudo install -o smp -g smp -m 0755 kubectl /usr/local/bin/kubectl
+          echo "Installing docker..."
+          sudo apt update -y
+          sudo apt install -y jq unzip apt-transport-https ca-certificates software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+          sudo apt-cache policy docker-ce
+          sudo apt install -y docker-ce
+          sudo systemctl status docker
+          sudo mkdir -p ~/.kube
+          sudo chmod 777 ~/.kube
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+
+      - name: Start minikube 
+        run: |
+          minikube start --memory 5000 
+          kubectl get po -A
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Istio Operator and Gateway CRD
+        run: |
+          cat /proc/cpuinfo | grep avx
+          curl -L https://istio.io/downloadIstio | sh -
+          cd istio-1.18.0
+          export PATH=$PWD/bin:$PATH
+          istioctl operator init
+          pwd
+
+         
+      
+      - name: MeshModel Component Register Check
+        run: |
+              kubectl config view --minify --flatten > ~/minified_config
+              mv ~/minified_config ~/.kube/config
+              echo 'mesheryctl is not installed. Installing mesheryctl client... Standby... (Starting Meshery as well...)' >&2
+              # curl -L https://meshery.io/install | ADAPTERS=istio PLATFORM=kubernetes bash -
+
+              output=$(curl -L https://meshery.io/install | PLATFORM=kubernetes bash - 2>&1)
+              echo $output
+              url=$(echo "$output" | grep -oP 'http://\S+' | tail -1)
+              echo "Generated URL: $url"
+
+              #forces meshery to register components and checks 
+              curl --location "${url}/api/system/sync" \
+                  --header 'meshery-token:${{ secrets.MESHERY_TOKEN }}' \
+                  --header 'Cookie: meshery-provider=Meshery; meshery.layer5.io_ref=/;token=${{ secrets.MESHERY_TOKEN }}'
+
+              curl --location "${url}/api/system/sync" \
+                  --header 'meshery-token:${{ secrets.MESHERY_TOKEN }}' \
+                  --header 'Cookie: meshery-provider=Meshery; meshery.layer5.io_ref=/;token=${{ secrets.MESHERY_TOKEN }}'
+
+              check_endpoint() {
+                  response=$(curl -s "${url}/api/meshmodels/models/kubernetes/components/IstioOperator" \
+                       -H 'Cookie: meshery-provider=Meshery;token=${{ secrets.MESHERY_TOKEN }}'
+                      )
+                  total_count=$(echo "$response" | grep -oP '(?<="total_count":)\d+')
+                  
+                  if [[ $total_count -ne 0 ]]; then
+                      echo "Components Registered"
+                      exit 0
+                  fi
+              }
+
+              # Set the duration for script execution (in seconds)
+              duration=$((5 * 60))
+
+              # Calculate the end time
+              end_time=$((SECONDS + duration))
+
+              # Loop until the end time is reached
+              while [[ $SECONDS -lt $end_time ]]; do
+                  check_endpoint
+                  echo "Checked, Components not registered"
+                  sleep 60
+              done
+
+              echo "Waited for 5 minutes components not registered"
+
+      - name: Deploy Istio Crypto design and deploy httpbin application
+        run: |
+          chmod +x .github/workflows/scripts/istioCrypto.sh
+          .github/workflows/scripts/istioCrypto.sh
+        shell: bash
+
+      - name: Get Date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H.%M.%S')"
+        
+      - name: Run Benchmark Tests
+        uses: layer5io/meshery-smp-action@master
+        with:
+          provider_token: ${{ secrets.MESHERY_TOKEN }}
+          platform: docker
+          profile_filename: load-test.yaml
+          endpoint_url: ${{env.ENDPOINT_URL}}
+          service_mesh: ${{env.SERVICE_MESH}}
+          load_generator: fortio
+          profile_name: 'istioCrypto-load-test.yaml'
+          test_name: '${{ steps.date.outputs.date }}'
+
+  stop-runner-scheduled:
+    name: Stop self-hosted runner
+    timeout-minutes: 60
+    needs:
+      - start-runners-scheduled # required to get output from the start-runner job
+      - scheduled-test # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: ${{ always() && github.event_name == 'schedule' }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      
+      - name: Stop CNCF CIL runner
+        run: |
+          chmod +x .github/workflows/scripts/stop-cil-runner.sh
+          .github/workflows/scripts/stop-cil-runner.sh ${{ secrets.cncf_cil_token }} istioCrypto-fortio-load-${{ needs.start-runners-scheduled.outputs.github_run_id }}
+        shell: bash
+
+      - name: Remove CNCF CIL runner from github repository
+        if: always()
+        run: |
+          runner_id=$(curl -s -H 'Authorization: token ${{ secrets.GH_ACCESS_TOKEN }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners | jq '.runners[] | select(.name == "istioCrypto-fortio-load-${{ needs.start-runners-scheduled.outputs.github_run_id }}") | {id}' | jq -r .id)
+          curl -X DELETE -H 'Authorization: token ${{ secrets.GH_ACCESS_TOKEN }}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{github.repository}}/actions/runners/$runner_id
+        shell: bash
